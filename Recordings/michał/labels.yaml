@@ -1,17 +1,17 @@
-Heminway-Michał.m4a: (M,True,Michal)
-michał-financial-times.m4a: (M,True,Michal)
-Onet-michał.m4a: (M,True,Michal)
-Warsaw-Central-3.m4a: (F,False,AlicjaMichal)
-Warsaw-Central-4.m4a: (F,False,AlicjaMichal)
-Warsaw-Central-5.m4a: (F,False,AlicjaMichal)
-anna-1.m4a : (F,False,AnnaMichal)
-anna-2.m4a : (F, False, AnnaMichal)
-anna-3.m4a : (F, False, AnnaMichal)
+Heminway-Michał.m4a: [M,True,Michal]
+michał-financial-times.m4a: [M,True,Michal]
+Onet-michał.m4a: [M,True,Michal]
+Warsaw-Central-3.m4a: [F,False,AlicjaMichal]
+Warsaw-Central-4.m4a: [F,False,AlicjaMichal]
+Warsaw-Central-5.m4a: [F,False,AlicjaMichal]
+anna-1.m4a : [F,False,AnnaMichal]
+anna-2.m4a : [F, False, AnnaMichal]
+anna-3.m4a : [F, False, AnnaMichal]
 
-AUDIO-2025-10-29-19-59-12.m4a : (F, False, WeronikaMichal)
-AUDIO-2025-10-29-22-42-29.m4a : (F, False, WeronikaMichal)
-AUDIO-2025-10-29-22-42-30.m4a : (F, False, WeronikaMichal)
+AUDIO-2025-10-29-19-59-12.m4a : [F, False, WeronikaMichal]
+AUDIO-2025-10-29-22-42-29.m4a : [F, False, WeronikaMichal]
+AUDIO-2025-10-29-22-42-30.m4a : [F, False, WeronikaMichal]
 
-iwo-sluchawki.m4a : (M, False, IwoMichal)
-iwo-iphone.m4a  : (M, False, IwoMichal)
-iwo-laptop.m4a : (M, False, IwoMichal)
+iwo-sluchawki.m4a : [M, False, IwoMichal]
+iwo-iphone.m4a  : [M, False, IwoMichal]
+iwo-laptop.m4a : [M, False, IwoMichal]
