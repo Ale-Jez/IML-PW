@@ -55,7 +55,8 @@ But keep in mind that many of these require <u> explicit comparison tests</u> an
 
 # Workplan
 
-It was generated using AI, therefore please keep in mind that there might be some mistakes.
+It was generated using AI, therefore please keep in mind that there might be some mistakes. 
+I altered it in a way, and added some additional points but still be careful.
 Also feel free to modify it. For now it's just a rough estimation what we can do.
 
 
@@ -84,9 +85,18 @@ Current status: ~5 points implemented in code. We need 3 more + documentation/co
     - [ ] Implement a comparison against a pre-trained model (e.g., a pre-trained ResNet or VGG adapted for audio/spectrograms).
 
 
+- [ ] Training different models and evaluating which one is the best.
+  - [ ] Problem with google collab
+  - [ ] Running locally?
+
+- [ ] A client program that will be used to interact with prepared codes. This program uses only one, best recognition model.
+
+
 
 
 ## 2. Report
+No longer than **10** pages.
+
 
 - [ ] LaTeX: I suggest we use it for the report.
 - [ ] Work Distribution Section: Create a table or list describing exactly what each group member contributed.
@@ -103,7 +113,7 @@ Current status: ~5 points implemented in code. We need 3 more + documentation/co
 
 
 
-## Split the work:
+## Splitting the work:
 
 ### Aleksander
 ### Michał
