@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Speaker Verification System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 600px;
+            width: 100%;
+            padding: 40px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .header h1 {
+            font-size: 28px;
+            color: #333;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: #666;
+            font-size: 14px;
+        }
+
+        .info-section {
+            background: #f5f5f5;
+            border-left: 4px solid #667eea;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 8px;
+        }
+
+        .info-section h3 {
+            color: #333;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .speakers-list {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+
+        .speaker-tag {
+            background: white;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .speaker-tag.enrolled {
+            background: #e8f5e9;
+            border-color: #4caf50;
+            color: #2e7d32;
+        }
+
+        .recording-section {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .upload-area {
+            border: 2px dashed #667eea;
+            border-radius: 12px;
+            padding: 40px 20px;
+            margin-bottom: 20px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: #f9f9f9;
+        }
+
+        .upload-area:hover {
+            background: #f0f4ff;
+            border-color: #764ba2;
+        }
+
+        .upload-area.dragover {
+            background: #e8eaf6;
+            border-color: #667eea;
+        }
+
+        .upload-area p {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        button {
+            padding: 12px 24px;
+            font-size: 14px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .btn-record {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-record:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-record:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-upload {
+            background: #f0f0f0;
+            color: #333;
+            flex: 1;
+            max-width: 200px;
+        }
+
+        .btn-upload:hover {
+            background: #e0e0e0;
+        }
+
+        .btn-clear {
+            background: #fff;
+            color: #999;
+            border: 1px solid #ddd;
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .btn-clear:hover {
+            background: #f5f5f5;
+        }
+
+        .result-section {
+            margin-top: 30px;
+            padding: 20px;
+            border-radius: 12px;
+            display: none;
+        }
+
+        .result-section.success {
+            background: #e8f5e9;
+            border-left: 4px solid #4caf50;
+            display: block;
+        }
+
+        .result-section.error {
+            background: #ffebee;
+            border-left: 4px solid #f44336;
+            display: block;
+        }
+
+        .result-status {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .status-icon {
+            font-size: 32px;
+            margin-right: 15px;
+        }
+
+        .status-text h2 {
+            font-size: 20px;
+            margin-bottom: 5px;
+        }
+
+        .status-text p {
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .result-section.success .status-icon {
+            color: #4caf50;
+        }
+
+        .result-section.success .status-text h2 {
+            color: #2e7d32;
+        }
+
+        .result-section.success .status-text p {
+            color: #558b2f;
+        }
+
+        .result-section.error .status-icon {
+            color: #f44336;
+        }
+
+        .result-section.error .status-text h2 {
+            color: #c62828;
+        }
+
+        .result-section.error .status-text p {
+            color: #d32f2f;
+        }
+
+        .result-details {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            font-size: 13px;
+        }
+
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+
+        .detail-row:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            color: #666;
+            font-weight: 600;
+        }
+
+        .detail-value {
+            color: #333;
+        }
+
+        .confidence-bar {
+            width: 100%;
+            height: 6px;
+            background: #e0e0e0;
+            border-radius: 3px;
+            margin-top: 5px;
+            overflow: hidden;
+        }
+
+        .confidence-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+            transition: width 0.3s ease;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            border: 4px solid #f0f0f0;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading.active {
+            display: block;
+        }
+
+        .audio-player {
+            margin: 15px 0;
+            padding: 15px;
+            background: #f5f5f5;
+            border-radius: 8px;
+            display: none;
+        }
+
+        .audio-player.active {
+            display: block;
+        }
+
+        .audio-player audio {
+            width: 100%;
+        }
+
+        .record-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            background: #f44336;
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 25px;
+            }
+
+            .header h1 {
+                font-size: 22px;
+            }
+
+            .button-group {
+                flex-direction: column;
+            }
+
+            .btn-record, .btn-upload {
+                max-width: none;
+            }
+
+            .speakers-list {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1>🎤 Speaker Verification</h1>
+            <p>Record or upload audio to verify speaker identity</p>
+        </div>
+
+        <!-- Enrolled Speakers Info -->
+        <div class="info-section">
+            <h3>📋 Enrolled Speakers</h3>
+            <div class="speakers-list" id="speakersList">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Recording Section -->
+        <div class="recording-section">
+            <div class="upload-area" id="uploadArea">
+                <p>📁 Drag audio file here or click to upload</p>
+                <button class="btn-upload" onclick="document.getElementById('fileInput').click()">
+                    Choose File
+                </button>
+                <input type="file" id="fileInput" class="file-input" accept="audio/*">
+            </div>
+
+            <div style="margin: 20px 0; text-align: center; color: #999;">
+                — OR —
+            </div>
+
+            <div class="button-group">
+                <button class="btn-record" id="recordBtn" onclick="toggleRecording()">
+                    🎙️ Start Recording
+                </button>
+            </div>
+
+            <div class="audio-player" id="audioPlayer">
+                <audio id="audioPreview" controls></audio>
+                <button class="btn-clear" onclick="clearAudio()">Clear Recording</button>
+            </div>
+        </div>
+
+        <!-- Loading Indicator -->
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <p style="margin-top: 10px; color: #666;">Processing audio...</p>
+        </div>
+
+        <!-- Results Section -->
+        <div class="result-section" id="resultSection">
+            <div class="result-status">
+                <div class="status-icon" id="statusIcon">✓</div>
+                <div class="status-text">
+                    <h2 id="resultTitle">Success</h2>
+                    <p id="resultMessage">Speaker verified</p>
+                </div>
+            </div>
+            <div class="result-details" id="resultDetails">
+                <!-- Will be populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ===================================================================
+        // GLOBAL STATE
+        // ===================================================================
+        let mediaRecorder = null;
+        let audioChunks = [];
+        let isRecording = false;
+        let audioBlob = null;
+
+        // ===================================================================
+        // INITIALIZATION
+        // ===================================================================
+        document.addEventListener('DOMContentLoaded', async () => {
+            await loadSpeakers();
+            setupEventListeners();
+        });
+
+        async function loadSpeakers() {
+            try {
+                const response = await fetch('/api/speakers');
+                const data = await response.json();
+                
+                const speakersList = document.getElementById('speakersList');
+                speakersList.innerHTML = '';
+                
+                for (const [id, name] of Object.entries(data.speakers)) {
+                    const tag = document.createElement('div');
+                    tag.className = 'speaker-tag enrolled';
+                    tag.textContent = `${id}: ${name}`;
+                    speakersList.appendChild(tag);
+                }
+            } catch (error) {
+                console.error('Failed to load speakers:', error);
+            }
+        }
+
+        function setupEventListeners() {
+            // Drag and drop
+            const uploadArea = document.getElementById('uploadArea');
+            uploadArea.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                uploadArea.classList.add('dragover');
+            });
+            uploadArea.addEventListener('dragleave', () => {
+                uploadArea.classList.remove('dragover');
+            });
+            uploadArea.addEventListener('drop', handleDrop);
+
+            // File input
+            document.getElementById('fileInput').addEventListener('change', handleFileSelect);
+        }
+
+        // ===================================================================
+        // AUDIO RECORDING
+        // ===================================================================
+        async function toggleRecording() {
+            if (!isRecording) {
+                // Start recording
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    mediaRecorder = new MediaRecorder(stream);
+                    audioChunks = [];
+
+                    mediaRecorder.ondataavailable = (event) => {
+                        audioChunks.push(event.data);
+                    };
+
+                    mediaRecorder.onstop = () => {
+                        audioBlob = new Blob(audioChunks, { type: 'audio/wav' });
+                        displayAudioPreview(audioBlob);
+                    };
+
+                    mediaRecorder.start();
+                    isRecording = true;
+
+                    const btn = document.getElementById('recordBtn');
+                    btn.innerHTML = '<span class="record-indicator"></span>Stop Recording';
+                    btn.style.background = '#f44336';
+                } catch (error) {
+                    showError('Microphone access denied. Please check permissions.');
+                }
+            } else {
+                // Stop recording
+                mediaRecorder.stop();
+                isRecording = false;
+
+                const btn = document.getElementById('recordBtn');
+                btn.innerHTML = '🎙️ Start Recording';
+                btn.style.background = '';
+
+                // Stop all audio tracks
+                mediaRecorder.stream.getTracks().forEach(track => track.stop());
+            }
+        }
+
+        // ===================================================================
+        // FILE HANDLING
+        // ===================================================================
+        function handleDrop(e) {
+            e.preventDefault();
+            document.getElementById('uploadArea').classList.remove('dragover');
+            
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                audioBlob = files[0];
+                displayAudioPreview(audioBlob);
+            }
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            if (files.length > 0) {
+                audioBlob = files[0];
+                displayAudioPreview(audioBlob);
+            }
+        }
+
+        function displayAudioPreview(blob) {
+            const url = URL.createObjectURL(blob);
+            document.getElementById('audioPreview').src = url;
+            document.getElementById('audioPlayer').classList.add('active');
+            
+            // Verify immediately
+            verifyAudio(blob);
+        }
+
+        function clearAudio() {
+            audioBlob = null;
+            document.getElementById('audioPlayer').classList.remove('active');
+            document.getElementById('audioPreview').src = '';
+            document.getElementById('fileInput').value = '';
+            document.getElementById('resultSection').style.display = 'none';
+        }
+
+        // ===================================================================
+        // VERIFICATION
+        // ===================================================================
+        async function verifyAudio(audioBlob) {
+            if (!audioBlob) {
+                showError('No audio file selected');
+                return;
+            }
+
+            showLoading(true);
+            hideResults();
+
+            try {
+                const formData = new FormData();
+                formData.append('audio', audioBlob);
+
+                const response = await fetch('/api/verify', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const data = await response.json();
+
+                if (data.status === 'success') {
+                    showResults(data, true);
+                } else {
+                    showError(data.message);
+                }
+            } catch (error) {
+                showError(`Verification failed: ${error.message}`);
+            } finally {
+                showLoading(false);
+            }
+        }
+
+        // ===================================================================
+        // UI HELPERS
+        // ===================================================================
+        function showLoading(show) {
+            document.getElementById('loading').classList.toggle('active', show);
+        }
+
+        function hideResults() {
+            document.getElementById('resultSection').style.display = 'none';
+        }
+
+        function showResults(data, isAllowed) {
+            const resultSection = document.getElementById('resultSection');
+            const statusIcon = document.getElementById('statusIcon');
+            const resultTitle = document.getElementById('resultTitle');
+            const resultMessage = document.getElementById('resultMessage');
+            const resultDetails = document.getElementById('resultDetails');
+
+            // Update class
+            resultSection.classList.remove('success', 'error');
+            resultSection.classList.add(isAllowed ? 'success' : 'error');
+
+            // Update status
+            statusIcon.textContent = isAllowed ? '✓' : '✗';
+            resultTitle.textContent = isAllowed ? 'Access Granted' : 'Access Denied';
+            resultMessage.textContent = data.message;
+
+            // Update details
+            const confidencePercent = Math.round((data.confidence + 1) * 50); // Convert from [-1,1] to [0,100]
+            resultDetails.innerHTML = `
+                <div class="detail-row">
+                    <span class="detail-label">Speaker:</span>
+                    <span class="detail-value">${data.speaker_id} - ${data.speaker_name}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Cosine Similarity:</span>
+                    <span class="detail-value">${data.confidence.toFixed(3)}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Enrolled:</span>
+                    <span class="detail-value">${data.is_enrolled ? '✓ Yes' : '✗ No'}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Confidence:</span>
+                    <div style="flex: 1; text-align: right;">
+                        <span class="detail-value">${confidencePercent}%</span>
+                        <div class="confidence-bar">
+                            <div class="confidence-fill" style="width: ${confidencePercent}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            resultSection.style.display = 'block';
+        }
+
+        function showError(message) {
+            const resultSection = document.getElementById('resultSection');
+            resultSection.classList.remove('success', 'error');
+            resultSection.classList.add('error');
+
+            document.getElementById('statusIcon').textContent = '✗';
+            document.getElementById('resultTitle').textContent = 'Error';
+            document.getElementById('resultMessage').textContent = message;
+            document.getElementById('resultDetails').innerHTML = '';
+
+            resultSection.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
