@@ -8,11 +8,16 @@ import numpy as np
 import librosa
 import h5py
 import yaml
+import torch
 from flask import Flask, render_template, request, jsonify
+from model_classes import SpeakerClassifier
 
 # =============================================================================
 # CONFIGURATION
 # =============================================================================
+
+# Model and data paths
+MODEL_PATH = "c:/Users/pczec/Desktop/Studia/SEM5/IML/IML-PW/checkpoints/train31/best_model.pt"
 H5_PATH = "../outputs/logmels_spkid_aug_26-01-25_19-04-46.h5"
 UPLOAD_FOLDER = "./uploads"
 ALLOWED_EXTENSIONS = {'wav', 'm4a', 'mp3', 'ogg'}
@@ -41,8 +46,23 @@ def load_speaker_mapping():
         print(f"Error loading speaker mapping: {e}")
     return {}
 
+
 SPEAKER_MAPPING = load_speaker_mapping()
 ENROLLED_SPEAKERS = set(SPEAKER_MAPPING.keys())
+
+# =============================================================================
+# LOAD PYTORCH MODEL
+# =============================================================================
+def load_model():
+    # Infer number of speakers from mapping
+    num_speakers = len(SPEAKER_MAPPING)
+    model = SpeakerClassifier(embedding_dim=256, num_speakers=num_speakers)
+    checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
+    model.load_state_dict(checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint)
+    model.eval()
+    return model
+
+model = load_model()
 
 # =============================================================================
 # SPEAKER EMBEDDINGS (from H5 training data)
@@ -151,43 +171,44 @@ class AudioProcessor:
         logmel = self.compute_logmel(audio_samples, duration=duration)
         return logmel
 
-print("Loading speaker embeddings from dataset...")
-SPEAKER_EMBEDDINGS = load_speaker_embeddings()
-print(f"✓ Loaded embeddings for {len(SPEAKER_EMBEDDINGS)} speakers")
 
 audio_processor = AudioProcessor()
 
 # =============================================================================
-# SPEAKER VERIFICATION INFERENCE
+
 # =============================================================================
-def infer_speaker(logmel_array, threshold=0.5):
-    """Verify speaker by logmel statistics comparison"""
+# INFERENCE MODES
+# =============================================================================
+def infer_speaker_identification(logmel_array, threshold=0.5):
+    """Identify speaker (multi-class)"""
     try:
-        test_mean = logmel_array.mean(axis=1)
-        test_std = logmel_array.std(axis=1)
-        test_embedding = np.concatenate([test_mean, test_std])
-        test_embedding = test_embedding / (np.linalg.norm(test_embedding) + 1e-8)
-        
-        similarities = {}
-        for speaker_id, speaker_data in SPEAKER_EMBEDDINGS.items():
-            template = speaker_data['embedding']
-            similarity = np.dot(test_embedding, template)
-            similarities[speaker_id] = similarity
-        
-        speaker_id = max(similarities, key=similarities.get)
-        confidence = similarities[speaker_id]
+        # Prepare input for model: (1, 1, freq, time)
+        x = torch.tensor(logmel_array, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+        speaker_id, confidence = model.infer(x)
         is_verified = confidence > threshold
-        
-        print(f"  All similarities: {[f'{similarities[i]:.4f}' for i in sorted(similarities.keys())]}")
-        print(f"  Best match: Speaker {speaker_id} ({SPEAKER_MAPPING.get(speaker_id, 'Unknown')}), Confidence: {confidence:.4f}")
-        
         return speaker_id, confidence, is_verified
-    
     except Exception as e:
         print(f"Inference error: {str(e)}")
         import traceback
         traceback.print_exc()
         raise ValueError(f"Inference failed: {e}")
+
+def infer_speaker_binary(logmel_array, target_speaker_id, threshold=0.5):
+    """Binary verification: is this speaker X?"""
+    try:
+        x = torch.tensor(logmel_array, dtype=torch.float32).unsqueeze(0).unsqueeze(0)
+        with torch.no_grad():
+            embeddings = model.backbone(x)
+            weight_norm = torch.nn.functional.normalize(model.classifier.weight, p=2, dim=1)
+            embedding_norm = torch.nn.functional.normalize(embeddings, p=2, dim=1)
+            similarity = torch.dot(embedding_norm[0], weight_norm[target_speaker_id])
+            is_verified = similarity > threshold
+        return target_speaker_id, similarity.item(), is_verified
+    except Exception as e:
+        print(f"Binary inference error: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        raise ValueError(f"Binary inference failed: {e}")
 
 # =============================================================================
 # FLASK ROUTES
@@ -196,35 +217,56 @@ def infer_speaker(logmel_array, threshold=0.5):
 def index():
     return render_template('index.html', speakers=SPEAKER_MAPPING)
 
+
 @app.route('/api/verify', methods=['POST'])
 def verify_speaker():
     try:
         if 'audio' not in request.files:
             return jsonify({'status': 'error', 'message': 'No audio file provided'}), 400
-        
         audio_file = request.files['audio']
         if audio_file.filename == '':
             return jsonify({'status': 'error', 'message': 'No audio file selected'}), 400
-        
         audio_data = audio_file.read()
         logmel = audio_processor.process_audio(audio_data, duration=3.0)
-        
-        speaker_id, confidence, is_verified = infer_speaker(logmel, threshold=0.5)
-        
-        speaker_name = SPEAKER_MAPPING.get(speaker_id, 'Unknown')
-        is_enrolled = speaker_id in ENROLLED_SPEAKERS
-        is_allowed = is_verified and is_enrolled
-        
-        return jsonify({
-            'status': 'success',
-            'speaker_id': int(speaker_id),
-            'speaker_name': speaker_name,
-            'confidence': float(confidence),
-            'is_enrolled': bool(is_enrolled),
-            'is_allowed': bool(is_allowed),
-            'message': f"Speaker identified: {speaker_name}" if is_allowed else "Access denied."
-        }), 200
-    
+
+        # Mode selection: 'mode' param: 'identification' (default) or 'binary'
+        mode = request.form.get('mode', 'identification')
+        threshold = float(request.form.get('threshold', 0.5))
+        if mode == 'binary':
+            # Must provide 'target_speaker_id' in form
+            try:
+                target_speaker_id = int(request.form['target_speaker_id'])
+            except Exception:
+                return jsonify({'status': 'error', 'message': 'Missing or invalid target_speaker_id for binary mode'}), 400
+            speaker_id, confidence, is_verified = infer_speaker_binary(logmel, target_speaker_id, threshold)
+            speaker_name = SPEAKER_MAPPING.get(speaker_id, 'Unknown')
+            is_enrolled = speaker_id in ENROLLED_SPEAKERS
+            is_allowed = is_verified and is_enrolled
+            return jsonify({
+                'status': 'success',
+                'mode': 'binary',
+                'speaker_id': int(speaker_id),
+                'speaker_name': speaker_name,
+                'confidence': float(confidence),
+                'is_enrolled': bool(is_enrolled),
+                'is_allowed': bool(is_allowed),
+                'message': f"Speaker {'verified' if is_allowed else 'not verified'}: {speaker_name}"
+            }), 200
+        else:
+            speaker_id, confidence, is_verified = infer_speaker_identification(logmel, threshold)
+            speaker_name = SPEAKER_MAPPING.get(speaker_id, 'Unknown')
+            is_enrolled = speaker_id in ENROLLED_SPEAKERS
+            is_allowed = is_verified and is_enrolled
+            return jsonify({
+                'status': 'success',
+                'mode': 'identification',
+                'speaker_id': int(speaker_id),
+                'speaker_name': speaker_name,
+                'confidence': float(confidence),
+                'is_enrolled': bool(is_enrolled),
+                'is_allowed': bool(is_allowed),
+                'message': f"Speaker identified: {speaker_name}" if is_allowed else "Access denied."
+            }), 200
     except Exception as e:
         return jsonify({'status': 'error', 'message': str(e)}), 500
 
