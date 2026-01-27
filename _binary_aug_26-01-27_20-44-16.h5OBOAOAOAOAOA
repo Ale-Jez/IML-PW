@@ -1,0 +1,1006 @@
+[1mdiff --git a/.gitignore b/.gitignore[m
+[1mindex ad5a764..46e8a69 100644[m
+[1m--- a/.gitignore[m
+[1m+++ b/.gitignore[m
+[36m@@ -1,582 +1,583 @@[m
+[31m-# Created by https://www.toptal.com/developers/gitignore/api/linux,macos,windows,python,jupyternotebooks,latex[m
+[31m-# Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,windows,python,jupyternotebooks,latex[m
+[31m-[m
+[31m-[m
+[31m-### Audio files ###[m
+[31m-*.mp3[m
+[31m-*.m4a[m
+[31m-*.wav[m
+[31m-[m
+[31m-[m
+[31m-[m
+[31m-### JupyterNotebooks ###[m
+[31m-# gitignore template for Jupyter Notebooks[m
+[31m-# website: http://jupyter.org/[m
+[31m-[m
+[31m-.ipynb_checkpoints[m
+[31m-*/.ipynb_checkpoints/*[m
+[31m-[m
+[31m-# IPython[m
+[31m-profile_default/[m
+[31m-ipython_config.py[m
+[31m-[m
+[31m-# Remove previous ipynb_checkpoints[m
+[31m-#   git rm -r .ipynb_checkpoints/[m
+[31m-[m
+[31m-### LaTeX ###[m
+[31m-## Core latex/pdflatex auxiliary files:[m
+[31m-*.aux[m
+[31m-*.lof[m
+[31m-*.log[m
+[31m-*.lot[m
+[31m-*.fls[m
+[31m-*.out[m
+[31m-*.toc[m
+[31m-*.fmt[m
+[31m-*.fot[m
+[31m-*.cb[m
+[31m-*.cb2[m
+[31m-.*.lb[m
+[31m-[m
+[31m-## Intermediate documents:[m
+[31m-*.dvi[m
+[31m-*.xdv[m
+[31m-*-converted-to.*[m
+[31m-# these rules might exclude image files for figures etc.[m
+[31m-# *.ps[m
+[31m-# *.eps[m
+[31m-# *.pdf[m
+[31m-[m
+[31m-## Generated if empty string is given at "Please type another file name for output:"[m
+[31m-.pdf[m
+[31m-[m
+[31m-## Bibliography auxiliary files (bibtex/biblatex/biber):[m
+[31m-*.bbl[m
+[31m-*.bcf[m
+[31m-*.blg[m
+[31m-*-blx.aux[m
+[31m-*-blx.bib[m
+[31m-*.run.xml[m
+[31m-[m
+[31m-## Build tool auxiliary files:[m
+[31m-*.fdb_latexmk[m
+[31m-*.synctex[m
+[31m-*.synctex(busy)[m
+[31m-*.synctex.gz[m
+[31m-*.synctex.gz(busy)[m
+[31m-*.pdfsync[m
+[31m-[m
+[31m-## Build tool directories for auxiliary files[m
+[31m-# latexrun[m
+[31m-latex.out/[m
+[31m-[m
+[31m-## Auxiliary and intermediate files from other packages:[m
+[31m-# algorithms[m
+[31m-*.alg[m
+[31m-*.loa[m
+[31m-[m
+[31m-# achemso[m
+[31m-acs-*.bib[m
+[31m-[m
+[31m-# amsthm[m
+[31m-*.thm[m
+[31m-[m
+[31m-# beamer[m
+[31m-*.nav[m
+[31m-*.pre[m
+[31m-*.snm[m
+[31m-*.vrb[m
+[31m-[m
+[31m-# changes[m
+[31m-*.soc[m
+[31m-[m
+[31m-# comment[m
+[31m-*.cut[m
+[31m-[m
+[31m-# cprotect[m
+[31m-*.cpt[m
+[31m-[m
+[31m-# elsarticle (documentclass of Elsevier journals)[m
+[31m-*.spl[m
+[31m-[m
+[31m-# endnotes[m
+[31m-*.ent[m
+[31m-[m
+[31m-# fixme[m
+[31m-*.lox[m
+[31m-[m
+[31m-# feynmf/feynmp[m
+[31m-*.mf[m
+[31m-*.mp[m
+[31m-*.t[1-9][m
+[31m-*.t[1-9][0-9][m
+[31m-*.tfm[m
+[31m-[m
+[31m-#(r)(e)ledmac/(r)(e)ledpar[m
+[31m-*.end[m
+[31m-*.?end[m
+[31m-*.[1-9][m
+[31m-*.[1-9][0-9][m
+[31m-*.[1-9][0-9][0-9][m
+[31m-*.[1-9]R[m
+[31m-*.[1-9][0-9]R[m
+[31m-*.[1-9][0-9][0-9]R[m
+[31m-*.eledsec[1-9][m
+[31m-*.eledsec[1-9]R[m
+[31m-*.eledsec[1-9][0-9][m
+[31m-*.eledsec[1-9][0-9]R[m
+[31m-*.eledsec[1-9][0-9][0-9][m
+[31m-*.eledsec[1-9][0-9][0-9]R[m
+[31m-[m
+[31m-# glossaries[m
+[31m-*.acn[m
+[31m-*.acr[m
+[31m-*.glg[m
+[31m-*.glo[m
+[31m-*.gls[m
+[31m-*.glsdefs[m
+[31m-*.lzo[m
+[31m-*.lzs[m
+[31m-*.slg[m
+[31m-*.slo[m
+[31m-*.sls[m
+[31m-[m
+[31m-# uncomment this for glossaries-extra (will ignore makeindex's style files!)[m
+[31m-# *.ist[m
+[31m-[m
+[31m-# gnuplot[m
+[31m-*.gnuplot[m
+[31m-*.table[m
+[31m-[m
+[31m-# gnuplottex[m
+[31m-*-gnuplottex-*[m
+[31m-[m
+[31m-# gregoriotex[m
+[31m-*.gaux[m
+[31m-*.glog[m
+[31m-*.gtex[m
+[31m-[m
+[31m-# htlatex[m
+[31m-*.4ct[m
+[31m-*.4tc[m
+[31m-*.idv[m
+[31m-*.lg[m
+[31m-*.trc[m
+[31m-*.xref[m
+[31m-[m
+[31m-# hyperref[m
+[31m-*.brf[m
+[31m-[m
+[31m-# knitr[m
+[31m-*-concordance.tex[m
+[31m-# TODO Uncomment the next line if you use knitr and want to ignore its generated tikz files[m
+[31m-# *.tikz[m
+[31m-*-tikzDictionary[m
+[31m-[m
+[31m-# listings[m
+[31m-*.lol[m
+[31m-[m
+[31m-# luatexja-ruby[m
+[31m-*.ltjruby[m
+[31m-[m
+[31m-# makeidx[m
+[31m-*.idx[m
+[31m-*.ilg[m
+[31m-*.ind[m
+[31m-[m
+[31m-# minitoc[m
+[31m-*.maf[m
+[31m-*.mlf[m
+[31m-*.mlt[m
+[31m-*.mtc[0-9]*[m
+[31m-*.slf[0-9]*[m
+[31m-*.slt[0-9]*[m
+[31m-*.stc[0-9]*[m
+[31m-[m
+[31m-# minted[m
+[31m-_minted*[m
+[31m-*.pyg[m
+[31m-[m
+[31m-# morewrites[m
+[31m-*.mw[m
+[31m-[m
+[31m-# newpax[m
+[31m-*.newpax[m
+[31m-[m
+[31m-# nomencl[m
+[31m-*.nlg[m
+[31m-*.nlo[m
+[31m-*.nls[m
+[31m-[m
+[31m-# pax[m
+[31m-*.pax[m
+[31m-[m
+[31m-# pdfpcnotes[m
+[31m-*.pdfpc[m
+[31m-[m
+[31m-# sagetex[m
+[31m-*.sagetex.sage[m
+[31m-*.sagetex.py[m
+[31m-*.sagetex.scmd[m
+[31m-[m
+[31m-# scrwfile[m
+[31m-*.wrt[m
+[31m-[m
+[31m-# svg[m
+[31m-svg-inkscape/[m
+[31m-[m
+[31m-# sympy[m
+[31m-*.sout[m
+[31m-*.sympy[m
+[31m-sympy-plots-for-*.tex/[m
+[31m-[m
+[31m-# pdfcomment[m
+[31m-*.upa[m
+[31m-*.upb[m
+[31m-[m
+[31m-# pythontex[m
+[31m-*.pytxcode[m
+[31m-pythontex-files-*/[m
+[31m-[m
+[31m-# tcolorbox[m
+[31m-*.listing[m
+[31m-[m
+[31m-# thmtools[m
+[31m-*.loe[m
+[31m-[m
+[31m-# TikZ & PGF[m
+[31m-*.dpth[m
+[31m-*.md5[m
+[31m-*.auxlock[m
+[31m-[m
+[31m-# titletoc[m
+[31m-*.ptc[m
+[31m-[m
+[31m-# todonotes[m
+[31m-*.tdo[m
+[31m-[m
+[31m-# vhistory[m
+[31m-*.hst[m
+[31m-*.ver[m
+[31m-[m
+[31m-# easy-todo[m
+[31m-*.lod[m
+[31m-[m
+[31m-# xcolor[m
+[31m-*.xcp[m
+[31m-[m
+[31m-# xmpincl[m
+[31m-*.xmpi[m
+[31m-[m
+[31m-# xindy[m
+[31m-*.xdy[m
+[31m-[m
+[31m-# xypic precompiled matrices and outlines[m
+[31m-*.xyc[m
+[31m-*.xyd[m
+[31m-[m
+[31m-# endfloat[m
+[31m-*.ttt[m
+[31m-*.fff[m
+[31m-[m
+[31m-# Latexian[m
+[31m-TSWLatexianTemp*[m
+[31m-[m
+[31m-## Editors:[m
+[31m-# WinEdt[m
+[31m-*.bak[m
+[31m-*.sav[m
+[31m-[m
+[31m-# Texpad[m
+[31m-.texpadtmp[m
+[31m-[m
+[31m-# LyX[m
+[31m-*.lyx~[m
+[31m-[m
+[31m-# Kile[m
+[31m-*.backup[m
+[31m-[m
+[31m-# gummi[m
+[31m-.*.swp[m
+[31m-[m
+[31m-# KBibTeX[m
+[31m-*~[0-9]*[m
+[31m-[m
+[31m-# TeXnicCenter[m
+[31m-*.tps[m
+[31m-[m
+[31m-# auto folder when using emacs and auctex[m
+[31m-./auto/*[m
+[31m-*.el[m
+[31m-[m
+[31m-# expex forward references with \gathertags[m
+[31m-*-tags.tex[m
+[31m-[m
+[31m-# standalone packages[m
+[31m-*.sta[m
+[31m-[m
+[31m-# Makeindex log files[m
+[31m-*.lpz[m
+[31m-[m
+[31m-# xwatermark package[m
+[31m-*.xwm[m
+[31m-[m
+[31m-# REVTeX puts footnotes in the bibliography by default, unless the nofootinbib[m
+[31m-# option is specified. Footnotes are the stored in a file with suffix Notes.bib.[m
+[31m-# Uncomment the next line to have this generated file ignored.[m
+[31m-#*Notes.bib[m
+[31m-[m
+[31m-### LaTeX Patch ###[m
+[31m-# LIPIcs / OASIcs[m
+[31m-*.vtc[m
+[31m-[m
+[31m-# glossaries[m
+[31m-*.glstex[m
+[31m-[m
+[31m-### Linux ###[m
+[31m-*~[m
+[31m-[m
+[31m-# temporary files which can be created if a process still has a handle open of a deleted file[m
+[31m-.fuse_hidden*[m
+[31m-[m
+[31m-# KDE directory preferences[m
+[31m-.directory[m
+[31m-[m
+[31m-# Linux trash folder which might appear on any partition or disk[m
+[31m-.Trash-*[m
+[31m-[m
+[31m-# .nfs files are created when an open file is removed but is still being accessed[m
+[31m-.nfs*[m
+[31m-[m
+[31m-### macOS ###[m
+[31m-# General[m
+[31m-.DS_Store[m
+[31m-.AppleDouble[m
+[31m-.LSOverride[m
+[31m-[m
+[31m-# Icon must end with two \r[m
+[31m-Icon[m
+[31m-[m
+[31m-[m
+[31m-# Thumbnails[m
+[31m-._*[m
+[31m-[m
+[31m-# Files that might appear in the root of a volume[m
+[31m-.DocumentRevisions-V100[m
+[31m-.fseventsd[m
+[31m-.Spotlight-V100[m
+[31m-.TemporaryItems[m
+[31m-.Trashes[m
+[31m-.VolumeIcon.icns[m
+[31m-.com.apple.timemachine.donotpresent[m
+[31m-[m
+[31m-# Directories potentially created on remote AFP share[m
+[31m-.AppleDB[m
+[31m-.AppleDesktop[m
+[31m-Network Trash Folder[m
+[31m-Temporary Items[m
+[31m-.apdisk[m
+[31m-[m
+[31m-### macOS Patch ###[m
+[31m-# iCloud generated files[m
+[31m-*.icloud[m
+[31m-[m
+[31m-### Python ###[m
+[31m-# Byte-compiled / optimized / DLL files[m
+[31m-__pycache__/[m
+[31m-*.py[cod][m
+[31m-*$py.class[m
+[31m-[m
+[31m-# C extensions[m
+[31m-*.so[m
+[31m-[m
+[31m-# Distribution / packaging[m
+[31m-.Python[m
+[31m-build/[m
+[31m-develop-eggs/[m
+[31m-dist/[m
+[31m-downloads/[m
+[31m-eggs/[m
+[31m-.eggs/[m
+[31m-lib/[m
+[31m-lib64/[m
+[31m-parts/[m
+[31m-sdist/[m
+[31m-var/[m
+[31m-wheels/[m
+[31m-share/python-wheels/[m
+[31m-*.egg-info/[m
+[31m-.installed.cfg[m
+[31m-*.egg[m
+[31m-MANIFEST[m
+[31m-[m
+[31m-# PyInstaller[m
+[31m-#  Usually these files are written by a python script from a template[m
+[31m-#  before PyInstaller builds the exe, so as to inject date/other infos into it.[m
+[31m-*.manifest[m
+[31m-*.spec[m
+[31m-[m
+[31m-# Installer logs[m
+[31m-pip-log.txt[m
+[31m-pip-delete-this-directory.txt[m
+[31m-[m
+[31m-# Unit test / coverage reports[m
+[31m-htmlcov/[m
+[31m-.tox/[m
+[31m-.nox/[m
+[31m-.coverage[m
+[31m-.coverage.*[m
+[31m-.cache[m
+[31m-nosetests.xml[m
+[31m-coverage.xml[m
+[31m-*.cover[m
+[31m-*.py,cover[m
+[31m-.hypothesis/[m
+[31m-.pytest_cache/[m
+[31m-cover/[m
+[31m-[m
+[31m-# Translations[m
+[31m-*.mo[m
+[31m-*.pot[m
+[31m-[m
+[31m-# Django stuff:[m
+[31m-local_settings.py[m
+[31m-db.sqlite3[m
+[31m-db.sqlite3-journal[m
+[31m-[m
+[31m-# Flask stuff:[m
+[31m-instance/[m
+[31m-.webassets-cache[m
+[31m-[m
+[31m-# Scrapy stuff:[m
+[31m-.scrapy[m
+[31m-[m
+[31m-# Sphinx documentation[m
+[31m-docs/_build/[m
+[31m-[m
+[31m-# PyBuilder[m
+[31m-.pybuilder/[m
+[31m-target/[m
+[31m-[m
+[31m-# Jupyter Notebook[m
+[31m-[m
+[31m-# IPython[m
+[31m-[m
+[31m-# pyenv[m
+[31m-#   For a library or package, you might want to ignore these files since the code is[m
+[31m-#   intended to run in multiple environments; otherwise, check them in:[m
+[31m-# .python-version[m
+[31m-[m
+[31m-# pipenv[m
+[31m-#   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.[m
+[31m-#   However, in case of collaboration, if having platform-specific dependencies or dependencies[m
+[31m-#   having no cross-platform support, pipenv may install dependencies that don't work, or not[m
+[31m-#   install all needed dependencies.[m
+[31m-#Pipfile.lock[m
+[31m-[m
+[31m-# poetry[m
+[31m-#   Similar to Pipfile.lock, it is generally recommended to include poetry.lock in version control.[m
+[31m-#   This is especially recommended for binary packages to ensure reproducibility, and is more[m
+[31m-#   commonly ignored for libraries.[m
+[31m-#   https://python-poetry.org/docs/basic-usage/#commit-your-poetrylock-file-to-version-control[m
+[31m-#poetry.lock[m
+[31m-[m
+[31m-# pdm[m
+[31m-#   Similar to Pipfile.lock, it is generally recommended to include pdm.lock in version control.[m
+[31m-#pdm.lock[m
+[31m-#   pdm stores project-wide configurations in .pdm.toml, but it is recommended to not include it[m
+[31m-#   in version control.[m
+[31m-#   https://pdm.fming.dev/#use-with-ide[m
+[31m-.pdm.toml[m
+[31m-[m
+[31m-# PEP 582; used by e.g. github.com/David-OConnor/pyflow and github.com/pdm-project/pdm[m
+[31m-__pypackages__/[m
+[31m-[m
+[31m-# Celery stuff[m
+[31m-celerybeat-schedule[m
+[31m-celerybeat.pid[m
+[31m-[m
+[31m-# SageMath parsed files[m
+[31m-*.sage.py[m
+[31m-[m
+[31m-# Environments[m
+[31m-.env[m
+[31m-.venv[m
+[31m-env/[m
+[31m-venv/[m
+[31m-ENV/[m
+[31m-env.bak/[m
+[31m-venv.bak/[m
+[31m-[m
+[31m-# Spyder project settings[m
+[31m-.spyderproject[m
+[31m-.spyproject[m
+[31m-[m
+[31m-# Rope project settings[m
+[31m-.ropeproject[m
+[31m-[m
+[31m-# mkdocs documentation[m
+[31m-/site[m
+[31m-[m
+[31m-# mypy[m
+[31m-.mypy_cache/[m
+[31m-.dmypy.json[m
+[31m-dmypy.json[m
+[31m-[m
+[31m-# Pyre type checker[m
+[31m-.pyre/[m
+[31m-[m
+[31m-# pytype static type analyzer[m
+[31m-.pytype/[m
+[31m-[m
+[31m-# Cython debug symbols[m
+[31m-cython_debug/[m
+[31m-[m
+[31m-# PyCharm[m
+[31m-#  JetBrains specific template is maintained in a separate JetBrains.gitignore that can[m
+[31m-#  be found at https://github.com/github/gitignore/blob/main/Global/JetBrains.gitignore[m
+[31m-#  and can be added to the global gitignore or merged into this file.  For a more nuclear[m
+[31m-#  option (not recommended) you can uncomment the following to ignore the entire idea folder.[m
+[31m-#.idea/[m
+[31m-[m
+[31m-### Python Patch ###[m
+[31m-# Poetry local configuration file - https://python-poetry.org/docs/configuration/#local-configuration[m
+[31m-poetry.toml[m
+[31m-[m
+[31m-# ruff[m
+[31m-.ruff_cache/[m
+[31m-[m
+[31m-# LSP config files[m
+[31m-pyrightconfig.json[m
+[31m-[m
+[31m-### Windows ###[m
+[31m-# Windows thumbnail cache files[m
+[31m-Thumbs.db[m
+[31m-Thumbs.db:encryptable[m
+[31m-ehthumbs.db[m
+[31m-ehthumbs_vista.db[m
+[31m-[m
+[31m-# Dump file[m
+[31m-*.stackdump[m
+[31m-[m
+[31m-# Folder config file[m
+[31m-[Dd]esktop.ini[m
+[31m-[m
+[31m-# Recycle Bin used on file shares[m
+[31m-$RECYCLE.BIN/[m
+[31m-[m
+[31m-# Windows Installer files[m
+[31m-*.cab[m
+[31m-*.msi[m
+[31m-*.msix[m
+[31m-*.msm[m
+[31m-*.msp[m
+[31m-[m
+[31m-# Windows shortcuts[m
+[31m-*.lnk[m
+[31m-[m
+[31m-# End of https://www.toptal.com/developers/gitignore/api/linux,macos,windows,python,jupyternotebooks,latex[m
+[31m-[m
+[31m-*.h5[m
+[31m-outputs/[m
+[31m-checkpoints/ [m
+[32m+[m[32m# Created by https://www.toptal.com/developers/gitignore/api/linux,macos,windows,python,jupyternotebooks,latex[m[41m[m
+[32m+[m[32m# Edit at https://www.toptal.com/developers/gitignore?templates=linux,macos,windows,python,jupyternotebooks,latex[m[41m[m
+[32m+[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m### Audio files ###[m[41m[m
+[32m+[m[32m*.mp3[m[41m[m
+[32m+[m[32m*.m4a[m[41m[m
+[32m+[m[32m*.wav[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m*sync-conflict*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m### JupyterNotebooks ###[m[41m[m
+[32m+[m[32m# gitignore template for Jupyter Notebooks[m[41m[m
+[32m+[m[32m# website: http://jupyter.org/[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m.ipynb_checkpoints[m[41m[m
+[32m+[m[32m*/.ipynb_checkpoints/*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# IPython[m[41m[m
+[32m+[m[32mprofile_default/[m[41m[m
+[32m+[m[32mipython_config.py[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Remove previous ipynb_checkpoints[m[41m[m
+[32m+[m[32m#   git rm -r .ipynb_checkpoints/[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m### LaTeX ###[m[41m[m
+[32m+[m[32m## Core latex/pdflatex auxiliary files:[m[41m[m
+[32m+[m[32m*.aux[m[41m[m
+[32m+[m[32m*.lof[m[41m[m
+[32m+[m[32m*.log[m[41m[m
+[32m+[m[32m*.lot[m[41m[m
+[32m+[m[32m*.fls[m[41m[m
+[32m+[m[32m*.out[m[41m[m
+[32m+[m[32m*.toc[m[41m[m
+[32m+[m[32m*.fmt[m[41m[m
+[32m+[m[32m*.fot[m[41m[m
+[32m+[m[32m*.cb[m[41m[m
+[32m+[m[32m*.cb2[m[41m[m
+[32m+[m[32m.*.lb[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m## Intermediate documents:[m[41m[m
+[32m+[m[32m*.dvi[m[41m[m
+[32m+[m[32m*.xdv[m[41m[m
+[32m+[m[32m*-converted-to.*[m[41m[m
+[32m+[m[32m# these rules might exclude image files for figures etc.[m[41m[m
+[32m+[m[32m# *.ps[m[41m[m
+[32m+[m[32m# *.eps[m[41m[m
+[32m+[m[32m# *.pdf[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m## Generated if empty string is given at "Please type another file name for output:"[m[41m[m
+[32m+[m[32m.pdf[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m## Bibliography auxiliary files (bibtex/biblatex/biber):[m[41m[m
+[32m+[m[32m*.bbl[m[41m[m
+[32m+[m[32m*.bcf[m[41m[m
+[32m+[m[32m*.blg[m[41m[m
+[32m+[m[32m*-blx.aux[m[41m[m
+[32m+[m[32m*-blx.bib[m[41m[m
+[32m+[m[32m*.run.xml[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m## Build tool auxiliary files:[m[41m[m
+[32m+[m[32m*.fdb_latexmk[m[41m[m
+[32m+[m[32m*.synctex[m[41m[m
+[32m+[m[32m*.synctex(busy)[m[41m[m
+[32m+[m[32m*.synctex.gz[m[41m[m
+[32m+[m[32m*.synctex.gz(busy)[m[41m[m
+[32m+[m[32m*.pdfsync[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m## Build tool directories for auxiliary files[m[41m[m
+[32m+[m[32m# latexrun[m[41m[m
+[32m+[m[32mlatex.out/[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m## Auxiliary and intermediate files from other packages:[m[41m[m
+[32m+[m[32m# algorithms[m[41m[m
+[32m+[m[32m*.alg[m[41m[m
+[32m+[m[32m*.loa[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# achemso[m[41m[m
+[32m+[m[32macs-*.bib[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# amsthm[m[41m[m
+[32m+[m[32m*.thm[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# beamer[m[41m[m
+[32m+[m[32m*.nav[m[41m[m
+[32m+[m[32m*.pre[m[41m[m
+[32m+[m[32m*.snm[m[41m[m
+[32m+[m[32m*.vrb[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# changes[m[41m[m
+[32m+[m[32m*.soc[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# comment[m[41m[m
+[32m+[m[32m*.cut[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# cprotect[m[41m[m
+[32m+[m[32m*.cpt[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# elsarticle (documentclass of Elsevier journals)[m[41m[m
+[32m+[m[32m*.spl[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# endnotes[m[41m[m
+[32m+[m[32m*.ent[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# fixme[m[41m[m
+[32m+[m[32m*.lox[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# feynmf/feynmp[m[41m[m
+[32m+[m[32m*.mf[m[41m[m
+[32m+[m[32m*.mp[m[41m[m
+[32m+[m[32m*.t[1-9][m[41m[m
+[32m+[m[32m*.t[1-9][0-9][m[41m[m
+[32m+[m[32m*.tfm[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m#(r)(e)ledmac/(r)(e)ledpar[m[41m[m
+[32m+[m[32m*.end[m[41m[m
+[32m+[m[32m*.?end[m[41m[m
+[32m+[m[32m*.[1-9][m[41m[m
+[32m+[m[32m*.[1-9][0-9][m[41m[m
+[32m+[m[32m*.[1-9][0-9][0-9][m[41m[m
+[32m+[m[32m*.[1-9]R[m[41m[m
+[32m+[m[32m*.[1-9][0-9]R[m[41m[m
+[32m+[m[32m*.[1-9][0-9][0-9]R[m[41m[m
+[32m+[m[32m*.eledsec[1-9][m[41m[m
+[32m+[m[32m*.eledsec[1-9]R[m[41m[m
+[32m+[m[32m*.eledsec[1-9][0-9][m[41m[m
+[32m+[m[32m*.eledsec[1-9][0-9]R[m[41m[m
+[32m+[m[32m*.eledsec[1-9][0-9][0-9][m[41m[m
+[32m+[m[32m*.eledsec[1-9][0-9][0-9]R[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# glossaries[m[41m[m
+[32m+[m[32m*.acn[m[41m[m
+[32m+[m[32m*.acr[m[41m[m
+[32m+[m[32m*.glg[m[41m[m
+[32m+[m[32m*.glo[m[41m[m
+[32m+[m[32m*.gls[m[41m[m
+[32m+[m[32m*.glsdefs[m[41m[m
+[32m+[m[32m*.lzo[m[41m[m
+[32m+[m[32m*.lzs[m[41m[m
+[32m+[m[32m*.slg[m[41m[m
+[32m+[m[32m*.slo[m[41m[m
+[32m+[m[32m*.sls[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# uncomment this for glossaries-extra (will ignore makeindex's style files!)[m[41m[m
+[32m+[m[32m# *.ist[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# gnuplot[m[41m[m
+[32m+[m[32m*.gnuplot[m[41m[m
+[32m+[m[32m*.table[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# gnuplottex[m[41m[m
+[32m+[m[32m*-gnuplottex-*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# gregoriotex[m[41m[m
+[32m+[m[32m*.gaux[m[41m[m
+[32m+[m[32m*.glog[m[41m[m
+[32m+[m[32m*.gtex[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# htlatex[m[41m[m
+[32m+[m[32m*.4ct[m[41m[m
+[32m+[m[32m*.4tc[m[41m[m
+[32m+[m[32m*.idv[m[41m[m
+[32m+[m[32m*.lg[m[41m[m
+[32m+[m[32m*.trc[m[41m[m
+[32m+[m[32m*.xref[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# hyperref[m[41m[m
+[32m+[m[32m*.brf[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# knitr[m[41m[m
+[32m+[m[32m*-concordance.tex[m[41m[m
+[32m+[m[32m# TODO Uncomment the next line if you use knitr and want to ignore its generated tikz files[m[41m[m
+[32m+[m[32m# *.tikz[m[41m[m
+[32m+[m[32m*-tikzDictionary[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# listings[m[41m[m
+[32m+[m[32m*.lol[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# luatexja-ruby[m[41m[m
+[32m+[m[32m*.ltjruby[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# makeidx[m[41m[m
+[32m+[m[32m*.idx[m[41m[m
+[32m+[m[32m*.ilg[m[41m[m
+[32m+[m[32m*.ind[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# minitoc[m[41m[m
+[32m+[m[32m*.maf[m[41m[m
+[32m+[m[32m*.mlf[m[41m[m
+[32m+[m[32m*.mlt[m[41m[m
+[32m+[m[32m*.mtc[0-9]*[m[41m[m
+[32m+[m[32m*.slf[0-9]*[m[41m[m
+[32m+[m[32m*.slt[0-9]*[m[41m[m
+[32m+[m[32m*.stc[0-9]*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# minted[m[41m[m
+[32m+[m[32m_minted*[m[41m[m
+[32m+[m[32m*.pyg[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# morewrites[m[41m[m
+[32m+[m[32m*.mw[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# newpax[m[41m[m
+[32m+[m[32m*.newpax[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# nomencl[m[41m[m
+[32m+[m[32m*.nlg[m[41m[m
+[32m+[m[32m*.nlo[m[41m[m
+[32m+[m[32m*.nls[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# pax[m[41m[m
+[32m+[m[32m*.pax[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# pdfpcnotes[m[41m[m
+[32m+[m[32m*.pdfpc[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# sagetex[m[41m[m
+[32m+[m[32m*.sagetex.sage[m[41m[m
+[32m+[m[32m*.sagetex.py[m[41m[m
+[32m+[m[32m*.sagetex.scmd[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# scrwfile[m[41m[m
+[32m+[m[32m*.wrt[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# svg[m[41m[m
+[32m+[m[32msvg-inkscape/[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# sympy[m[41m[m
+[32m+[m[32m*.sout[m[41m[m
+[32m+[m[32m*.sympy[m[41m[m
+[32m+[m[32msympy-plots-for-*.tex/[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# pdfcomment[m[41m[m
+[32m+[m[32m*.upa[m[41m[m
+[32m+[m[32m*.upb[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# pythontex[m[41m[m
+[32m+[m[32m*.pytxcode[m[41m[m
+[32m+[m[32mpythontex-files-*/[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# tcolorbox[m[41m[m
+[32m+[m[32m*.listing[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# thmtools[m[41m[m
+[32m+[m[32m*.loe[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# TikZ & PGF[m[41m[m
+[32m+[m[32m*.dpth[m[41m[m
+[32m+[m[32m*.md5[m[41m[m
+[32m+[m[32m*.auxlock[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# titletoc[m[41m[m
+[32m+[m[32m*.ptc[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# todonotes[m[41m[m
+[32m+[m[32m*.tdo[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# vhistory[m[41m[m
+[32m+[m[32m*.hst[m[41m[m
+[32m+[m[32m*.ver[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# easy-todo[m[41m[m
+[32m+[m[32m*.lod[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# xcolor[m[41m[m
+[32m+[m[32m*.xcp[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# xmpincl[m[41m[m
+[32m+[m[32m*.xmpi[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# xindy[m[41m[m
+[32m+[m[32m*.xdy[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# xypic precompiled matrices and outlines[m[41m[m
+[32m+[m[32m*.xyc[m[41m[m
+[32m+[m[32m*.xyd[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# endfloat[m[41m[m
+[32m+[m[32m*.ttt[m[41m[m
+[32m+[m[32m*.fff[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Latexian[m[41m[m
+[32m+[m[32mTSWLatexianTemp*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m## Editors:[m[41m[m
+[32m+[m[32m# WinEdt[m[41m[m
+[32m+[m[32m*.bak[m[41m[m
+[32m+[m[32m*.sav[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Texpad[m[41m[m
+[32m+[m[32m.texpadtmp[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# LyX[m[41m[m
+[32m+[m[32m*.lyx~[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Kile[m[41m[m
+[32m+[m[32m*.backup[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# gummi[m[41m[m
+[32m+[m[32m.*.swp[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# KBibTeX[m[41m[m
+[32m+[m[32m*~[0-9]*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# TeXnicCenter[m[41m[m
+[32m+[m[32m*.tps[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# auto folder when using emacs and auctex[m[41m[m
+[32m+[m[32m./auto/*[m[41m[m
+[32m+[m[32m*.el[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# expex forward references with \gathertags[m[41m[m
+[32m+[m[32m*-tags.tex[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# standalone packages[m[41m[m
+[32m+[m[32m*.sta[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Makeindex log files[m[41m[m
+[32m+[m[32m*.lpz[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# xwatermark package[m[41m[m
+[32m+[m[32m*.xwm[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# REVTeX puts footnotes in the bibliography by default, unless the nofootinbib[m[41m[m
+[32m+[m[32m# option is specified. Footnotes are the stored in a file with suffix Notes.bib.[m[41m[m
+[32m+[m[32m# Uncomment the next line to have this generated file ignored.[m[41m[m
+[32m+[m[32m#*Notes.bib[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m### LaTeX Patch ###[m[41m[m
+[32m+[m[32m# LIPIcs / OASIcs[m[41m[m
+[32m+[m[32m*.vtc[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# glossaries[m[41m[m
+[32m+[m[32m*.glstex[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m### Linux ###[m[41m[m
+[32m+[m[32m*~[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# temporary files which can be created if a process still has a handle open of a deleted file[m[41m[m
+[32m+[m[32m.fuse_hidden*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# KDE directory preferences[m[41m[m
+[32m+[m[32m.directory[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Linux trash folder which might appear on any partition or disk[m[41m[m
+[32m+[m[32m.Trash-*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# .nfs files are created when an open file is removed but is still being accessed[m[41m[m
+[32m+[m[32m.nfs*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m### macOS ###[m[41m[m
+[32m+[m[32m# General[m[41m[m
+[32m+[m[32m.DS_Store[m[41m[m
+[32m+[m[32m.AppleDouble[m[41m[m
+[32m+[m[32m.LSOverride[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Icon must end with two \r[m[41m[m
+[32m+[m[32mIcon[m[41m[m
+[32m+[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Thumbnails[m[41m[m
+[32m+[m[32m._*[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Files that might appear in the root of a volume[m[41m[m
+[32m+[m[32m.DocumentRevisions-V100[m[41m[m
+[32m+[m[32m.fseventsd[m[41m[m
+[32m+[m[32m.Spotlight-V100[m[41m[m
+[32m+[m[32m.TemporaryItems[m[41m[m
+[32m+[m[32m.Trashes[m[41m[m
+[32m+[m[32m.VolumeIcon.icns[m[41m[m
+[32m+[m[32m.com.apple.timemachine.donotpresent[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Directories potentially created on remote AFP share[m[41m[m
+[32m+[m[32m.AppleDB[m[41m[m
+[32m+[m[32m.AppleDesktop[m[41m[m
+[32m+[m[32mNetwork Trash Folder[m[41m[m
+[32m+[m[32mTemporary Items[m[41m[m
+[32m+[m[32m.apdisk[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m### macOS Patch ###[m[41m[m
+[32m+[m[32m# iCloud generated files[m[41m[m
+[32m+[m[32m*.icloud[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m### Python ###[m[41m[m
+[32m+[m[32m# Byte-compiled / optimized / DLL files[m[41m[m
+[32m+[m[32m__pycache__/[m[41m[m
+[32m+[m[32m*.py[cod][m[41m[m
+[32m+[m[32m*$py.class[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# C extensions[m[41m[m
+[32m+[m[32m*.so[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# Distribution / packaging[m[41m[m
+[32m+[m[32m.Python[m[41m[m
+[32m+[m[32mbuild/[m[41m[m
+[32m+[m[32mdevelop-eggs/[m[41m[m
+[32m+[m[32mdist/[m[41m[m
+[32m+[m[32mdownloads/[m[41m[m
+[32m+[m[32meggs/[m[41m[m
+[32m+[m[32m.eggs/[m[41m[m
+[32m+[m[32mlib/[m[41m[m
+[32m+[m[32mlib64/[m[41m[m
+[32m+[m[32mparts/[m[41m[m
+[32m+[m[32msdist/[m[41m[m
+[32m+[m[32mvar/[m[41m[m
+[32m+[m[32mwheels/[m[41m[m
+[32m+[m[32mshare/python-wheels/[m[41m[m
+[32m+[m[32m*.egg-info/[m[41m[m
+[32m+[m[32m.installed.cfg[m[41m[m
+[32m+[m[32m*.egg[m[41m[m
+[32m+[m[32mMANIFEST[m[41m[m
+[32m+[m[41m[m
+[32m+[m[32m# PyInstaller[m[41m[m
+[32m+[m[32m#  Usually these files are written by a python script from a template[m[41m[m
+[32m+[m[32m#  before PyInstaller builds the exe, so as to inject date/other infos into it.[m[41m[m
+[32m+[m[32m*.manifest[m[41m[m
+[32m+[m[32m*.spec[m[41m[m
+[32
