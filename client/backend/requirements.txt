@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+python-multipart
+onnxruntime
+numpy
+librosa
+pydub
+scipy
+h5py
