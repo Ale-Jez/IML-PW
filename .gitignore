@@ -7,6 +7,7 @@
 *.m4a
 *.wav
 
+*sync-conflict*
 
 
 ### JupyterNotebooks ###
