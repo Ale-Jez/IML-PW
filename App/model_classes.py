@@ -203,15 +203,16 @@ class SpeakerClassifier(nn.Module):
         """Speaker identification"""
         with torch.no_grad():
             embeddings = self.backbone(x, lengths)  # (1, embedding_dim)
-            
             # Normalize
             embedding_norm = F.normalize(embeddings, p=2, dim=1)  # (1, embedding_dim)
             weight_norm = F.normalize(self.classifier.weight, p=2, dim=1)  # (num_speakers, embedding_dim)
-            
+            # Handle case where there are no speakers
+            if weight_norm.shape[0] == 0:
+                raise ValueError("No enrolled speakers: classifier weight has zero rows.")
             # Cosine similarities
             similarities = torch.mm(embedding_norm, weight_norm.t())  # (1, num_speakers)
-            
+            if similarities.shape[1] == 0:
+                raise ValueError("No enrolled speakers: similarity matrix has zero columns.")
             speaker_id = similarities.argmax(dim=1).item()
             confidence = similarities[0, speaker_id].item()
-            
             return speaker_id, confidence
