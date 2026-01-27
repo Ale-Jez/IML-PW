@@ -1,0 +1,3 @@
+embed_dim: 256
+label_mode: binary
+num_classes: 2

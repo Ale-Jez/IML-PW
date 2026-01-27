@@ -1,0 +1,3 @@
+embed_dim: 256
+label_mode: speaker_id
+num_classes: 58
