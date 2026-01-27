@@ -17,8 +17,10 @@ from model_classes import SpeakerClassifier
 # =============================================================================
 
 # Model and data paths
-MODEL_PATH = "c:/Users/pczec/Desktop/Studia/SEM5/IML/IML-PW/checkpoints/train31/best_model.pt"
-H5_PATH = "../outputs/logmels_spkid_aug_26-01-25_19-04-46.h5"
+MODEL_PATH = "c:/Users/pczec/Desktop/Studia/SEM5/IML/IML-PW/checkpoints/train29/best_model.pt"
+# Use an available H5 file
+
+H5_PATH = "c:/Users/pczec/Desktop/Studia/SEM5/IML/IML-PW/outputs/logmels_binary_aug_26-01-26_15-26-21.h5"
 UPLOAD_FOLDER = "./uploads"
 ALLOWED_EXTENSIONS = {'wav', 'm4a', 'mp3', 'ogg'}
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
@@ -40,7 +42,8 @@ def load_speaker_mapping():
                 mapping_yaml = f["meta"]["speaker_mapping.yaml"][()].decode("utf-8")
                 speaker_mapping = yaml.safe_load(mapping_yaml)
                 speakers_dict = speaker_mapping.get("speakers", {})
-                label_to_name = {v: k for k, v in speakers_dict.items()}
+                # Map label id (int) to speaker name
+                label_to_name = {v['id']: k for k, v in speakers_dict.items()}
                 return label_to_name
     except Exception as e:
         print(f"Error loading speaker mapping: {e}")
@@ -58,7 +61,21 @@ def load_model():
     num_speakers = len(SPEAKER_MAPPING)
     model = SpeakerClassifier(embedding_dim=256, num_speakers=num_speakers)
     checkpoint = torch.load(MODEL_PATH, map_location=torch.device('cpu'))
-    model.load_state_dict(checkpoint['model_state_dict'] if 'model_state_dict' in checkpoint else checkpoint)
+    # Try to load only matching keys
+    if 'model_state_dict' in checkpoint:
+        state_dict = checkpoint['model_state_dict']
+    else:
+        state_dict = checkpoint
+    # Filter keys to match model
+    model_keys = set(model.state_dict().keys())
+    filtered_state_dict = {k: v for k, v in state_dict.items() if k in model_keys}
+    missing = model_keys - set(filtered_state_dict.keys())
+    unexpected = set(state_dict.keys()) - model_keys
+    if missing:
+        print(f"Warning: Missing keys in checkpoint: {missing}")
+    if unexpected:
+        print(f"Warning: Unexpected keys in checkpoint: {unexpected}")
+    model.load_state_dict(filtered_state_dict, strict=False)
     model.eval()
     return model
 
