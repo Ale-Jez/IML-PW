@@ -10,9 +10,13 @@ import { toast } from "@/hooks/use-toast";
 import axios from "axios";
 
 type OperationStatus = "idle" | "processing" | "complete";
-type AuthResult = "authorized" | "unauthorized" | null;
-type IdentificationResultType = { name: string; confidence: number; authorized: boolean } | null;
 type AppMode = "verify" | "identify";
+
+interface VerificationResultData {
+  prediction: string;
+  predicted_id: 0 | 1;
+  confidence: number;
+}
 
 const API_BASE_URL = "http://10.223.135.81:8000";
 const isProcessing = (s: OperationStatus): boolean => s === "processing";
@@ -20,7 +24,8 @@ const isProcessing = (s: OperationStatus): boolean => s === "processing";
 const Index = () => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [status, setStatus] = useState<OperationStatus>("idle");
-  const [authResult, setAuthResult] = useState<AuthResult>(null);
+  const [verificationResultData, setVerificationResultData] =
+    useState<VerificationResultData | null>(null);
   const [identificationResult, setIdentificationResult] =
     useState<IdentificationResultType>(null);
   const [confidence, setConfidence] = useState<number | undefined>();
@@ -28,7 +33,7 @@ const Index = () => {
 
   const handleFileSelect = useCallback((file: File | null) => {
     setSelectedFile(file);
-    setAuthResult(null);
+    setVerificationResultData(null);
     setIdentificationResult(null);
     setStatus("idle");
   }, []);
@@ -45,27 +50,27 @@ const Index = () => {
 
     setMode("verify");
     setStatus("processing");
-    setAuthResult(null);
+    setVerificationResultData(null);
     setConfidence(undefined);
 
     const formData = new FormData();
     formData.append("audio_file", selectedFile);
 
     try {
-      const response = await axios.post(`${API_BASE_URL}/verify`, formData, {
+      const response = await axios.post<VerificationResultData>(`${API_BASE_URL}/verify`, formData, {
         headers: {
           "Content-Type": "multipart/form-data",
         },
       });
 
-      const { authorized, confidence } = response.data;
-      setAuthResult(authorized ? "authorized" : "unauthorized");
+      const { prediction, predicted_id, confidence } = response.data;
+      setVerificationResultData({ prediction, predicted_id, confidence });
       setConfidence(confidence);
       setStatus("complete");
 
       toast({
         title: "Verification Complete",
-        description: authorized
+        description: predicted_id === 1
           ? "Voice pattern recognized"
           : "Voice not in whitelist",
       });
@@ -126,7 +131,7 @@ const Index = () => {
 
   const handleReset = useCallback(() => {
     setSelectedFile(null);
-    setAuthResult(null);
+    setVerificationResultData(null);
     setIdentificationResult(null);
     setStatus("idle");
     setConfidence(undefined);
@@ -135,9 +140,13 @@ const Index = () => {
   const renderResult = () => {
     if (status !== "complete") return null;
 
-    if (mode === "verify" && authResult) {
+    if (mode === "verify" && verificationResultData) {
       return (
-        <VerificationResult status={authResult} confidence={confidence} />
+        <VerificationResult
+          prediction={verificationResultData.prediction}
+          predicted_id={verificationResultData.predicted_id}
+          confidence={verificationResultData.confidence}
+        />
       );
     }
 
@@ -243,3 +252,4 @@ const Index = () => {
 };
 
 export default Index;
+

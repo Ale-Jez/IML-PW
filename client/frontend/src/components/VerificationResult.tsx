@@ -2,17 +2,19 @@ import { CheckCircle, XCircle, Shield } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface VerificationResultProps {
-  status: "authorized" | "unauthorized" | null;
+  prediction: string | null;
+  predicted_id: 0 | 1 | null;
   confidence?: number;
 }
 
 export const VerificationResult = ({
-  status,
+  prediction,
+  predicted_id,
   confidence,
 }: VerificationResultProps) => {
-  if (!status) return null;
+  if (predicted_id === null) return null;
 
-  const isAuthorized = status === "authorized";
+  const isAuthorized = predicted_id === 1;
 
   return (
     <div
@@ -63,9 +65,7 @@ export const VerificationResult = ({
       </h2>
 
       <p className="text-muted-foreground">
-        {isAuthorized
-          ? "Voice pattern matches authorized user"
-          : "Voice pattern not found in whitelist"}
+        {prediction}
       </p>
 
       {confidence !== undefined && (
@@ -78,11 +78,11 @@ export const VerificationResult = ({
                   "h-full rounded-full transition-all duration-1000",
                   isAuthorized ? "bg-success" : "bg-destructive"
                 )}
-                style={{ width: `${confidence}%` }}
+                style={{ width: `${confidence * 100}%` }}
               />
             </div>
             <span className="font-mono text-lg font-semibold">
-                {confidence * 100}%
+                {(confidence * 100).toFixed(2)}%
             </span>
           </div>
         </div>

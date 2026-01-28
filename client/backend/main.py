@@ -4,7 +4,7 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 
 from multi import recognize_speaker as multi_recognize_speaker
-from binary import verify_speaker as binary_verify_speaker
+from single import predict_speaker
 
 app = FastAPI()
 
@@ -58,8 +58,9 @@ async def verify_speaker(audio_file: UploadFile = File(...)):
             f.write(await audio_file.read())
 
         # Use the verify_speaker function from binary.py
-        result_dict = await binary_verify_speaker(temp_path)
-        return dict(result_dict)
+        prediction, pred_id, avg_conf = predict_speaker(temp_path)
+        print(prediction, pred_id, avg_conf)
+        return {"prediction": prediction, "predicted_id": pred_id, "confidence": avg_conf}
 
     except Exception as e:
         print(f"Error during speaker recognition: {e}")
