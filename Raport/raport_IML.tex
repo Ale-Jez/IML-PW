@@ -3,11 +3,13 @@
 \usepackage[utf8]{inputenc}
 \usepackage[english]{babel}
 \usepackage{graphicx}
+\usepackage{tabto}
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{fancyhdr}
 \usepackage{hyperref}
 \usepackage{listings}
+\usepackage{svg}
 \usepackage{xcolor}
 \usepackage{booktabs}
 \usepackage{float}
@@ -21,7 +23,7 @@
 \newcommand{\validate}{(10\%)} 
 \newcommand{\test}{(10\%)} 
 \newcommand{\timeRTX}{0.3 - 2 minutes}
-\newcommand{\interferenceSpeed}{ 50-100 samples/second}
+\newcommand{\interferenceSpeed}{50-100 samples/second}
 % ---------------------------------
 
 % Code formatting
@@ -47,7 +49,7 @@
     Introduction to Machine Learning Course\\
     Final Report}
 \author{Team: Aleksander Jeżowski, Mantas Mikulskis, \\
- Michał Kozickki, Piotr Czechowski, Rafał Lasota}
+ Michał Kozicki, Piotr Czechowski, Rafał Lasota}
 \date{January 2026}
 
 \begin{document}
@@ -87,6 +89,13 @@ The primary objectives of this project are:
     \item Meet course requirements: implement and document at least 8 advanced ML concepts
 \end{itemize}
 
+The primary objective of this project is to develop a deep learning system capable of robust speaker recognition.
+Specifically, we aim to achieve high performance through \textbf{dual-mode training}, optimizing the model for the following tasks:
+\begin{enumerate}
+    \item \textbf{Speaker Authentication:} Verifying if a speaker belongs to the authorized group or not.
+    \item \textbf{Speaker Identification:} Correctly classifying a speaker from a pool of known identities.
+\end{enumerate}
+
 \subsection{Dataset}
 
 The dataset consists of voice recordings from \numSpeakers{} speakers. 
@@ -103,36 +112,87 @@ The data is split into training \train{}, validation \validate{}, and test \test
 
 
 
+
+
 \section{Exploratory Data Analysis}
 
-Before designing the architecture, an analysis of the dataset was performed to understand the distribution and characteristics of the voice recordings.
+Before designing the architecture, an analysis of the dataset was performed to understand the distribution and characteristics of the voice recordings. This step was crucial for determining the necessary preprocessing strategies, such as data augmentation and signal segmentation.
 
 \subsection{Class Distribution}
-The dataset contains recordings from \numSpeakers{} distinct speakers. We analyzed the number of samples per speaker to check for class imbalance.
-% [Insert a bar chart here showing sample counts per speaker if you have one]
-% If the data is balanced:
-The dataset is relatively balanced, ensuring that the model does not become biased toward speakers with significantly more data.
-% OR If the data is imbalanced:
-% As shown in Figure X, there is a significant class imbalance. This observation led to the decision to use the Macro-Averaged F1-score as our primary metric and to implement weighted sampling/loss.
+The dataset consists of recordings categorized into two primary classes: \textit{Allowed} (Class 1) and \textit{Not Allowed} (Class 0).
+As illustrated in Figure \ref{fig:class_balance}, there is a significant class imbalance, with Class 0 vastly outnumbering Class 1.  
 
-\subsection{Audio Duration Analysis}
-We analyzed the duration of the raw audio files to determine the optimal input length for the model.
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Assets/eda/recording_split.png}
+    \caption{Class balance and gender distribution across unique speakers.}
+    \label{fig:class_balance}
+\end{figure}
 
-Most recordings fall within the range of 3 to 10 seconds. This distribution informed our decision to use a fixed window size with padding or slicing during the preprocessing stage.
-
-\subsection{Spectral Analysis}
-To verify the quality of the recordings, we visualized the Log-Mel Spectrograms of different speakers.
-
-Visual inspection confirmed that:
+This observation led to two critical engineering decisions:
 \begin{itemize}
-    \item Distinct harmonic structures (pitch) are visible between male and female speakers.
-    \item Background noise levels vary, necessitating the use of noise injection augmentation.
-    \item There are periods of silence at the start/end of clips, justifying the silence removal step.
+    \item The adoption of the Macro-Averaged F1-score as the primary evaluation metric, as accuracy would be misleading.
+    \item The implementation of oversampling and augmentation for Class 1 to prevent the model from biasing entirely toward the majority class.
 \end{itemize}
 
 
+\subsection{Audio Duration Analysis}
+We analyzed the duration of the raw audio files.
+As shown in Figure \ref{fig:duration}, the dataset exhibits extreme variance in file length, ranging from short snippets ($<10$s) to extended recordings ($>1000$s).
+This distribution validates our preprocessing pipeline, which slices distinct 1-second segments from these raw files.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=0.8\linewidth]{Assets/eda/audioDuration.png}
+    \caption{Distribution of raw audio durations.}
+    \label{fig:duration}
+\end{figure}
 
 
+\newpage
+\subsection{Segmentation Consistency}
+To validate the integrity of the data pipeline, we analyzed the relationship between the raw recording length and the number of extracted segments.
+Fig. \ref{fig:chunk_analysis} (left) demonstrates a strong linear correlation between duration and chunk count.
+
+However, the distribution of chunks per second (Fig. \ref{fig:chunk_analysis}, right) reveals a mean extraction rate  higher than the expected $1.0$.
+This results in requirement for normalization during the loading phase.
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Assets/eda/chunk_analysis.png}
+    \caption{Line fit of recording duration vs. chunks and extraction density.}
+    \label{fig:chunk_analysis}
+\end{figure}
+
+\subsection{Spectral Analysis}
+To assess the separability of the classes in the frequency domain, the average spectrograms for both classes were computed (Figure \ref{fig:spectrogram}).
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Assets/eda/avgSpectrogram.png}
+    \caption{Average spectrograms for Class 0 (left) and Class 1 (right).}
+    \label{fig:spectrogram}
+\end{figure}
+
+Visual inspection reveals that the aggregate frequency content (the "average voice") is nearly indistinguishable between the two groups.
+This confirms that the model cannot rely on global statistics (like mean frequency).
+Instead, it must utilize a CNN to detect fine-grained, localized textural features, such as specific harmonic patterns, within the noise.
+
+
+
+
+\subsection{Manifold Visualization}
+Finally, to visualize the complexity of data, we projected the high-dimensional audio features into 2D space using t-SNE (Figure \ref{fig:tsne}).
+
+\begin{figure}[h]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Assets/eda/projection.png}
+    \caption{t-SNE projection of the audio features.}
+    \label{fig:tsne}
+\end{figure}
+
+The projection shows that the \textit{Allowed} speakers (green) are not clustered in a single region but are mixed deeply within \textit{Not Allowed} speakers (blue).
+This lack of linear separability confirms that shallow models (like Logistic Regression) would fail, justifying the choice of a deep architecture such as ours. 
 
 
 
@@ -142,56 +202,68 @@ Visual inspection confirmed that:
 
 \subsection{Audio Processing Pipeline}
 
-The data preprocessing pipeline involves several critical steps:
+The data preprocessing pipeline involves the following steps:
 
 \begin{itemize}
-    \item Audio Loading: Support for multiple formats (WAV, MP3, M4A, WMA) using librosa and pydub
-    \item Normalization: Volume normalization to ensure consistent loudness across samples
-    \item Silent Passage Removal: Automated detection and removal of silence from audio files to focus on speech content
-    \item Spectrogram Computation: Conversion of time-domain audio to frequency-domain log-mel spectrograms
-    \item Dataset Storage: HDF5 format with metadata including speaker mapping, sample rate, and preprocessing configuration
+\item Audio Loading: Support for multiple formats (WAV, MP3, M4A, WMA) using \texttt{soundfile} with a fallback to \texttt{librosa}.
+\item Resampling: Audio is resampled to 16,000 Hz if necessary.
+\item Silence Removal: Silence is removed from the audio using a threshold-based method.
+\item Chunking: Audio is split into fixed-length segments (default 1.0 second).
+\item Spectrogram Computation: Conversion of time-domain audio to frequency-domain log-mel spectrograms.
+\item Dataset Storage: HDF5 format with metadata including speaker mapping, labels, and augmentation tags.
 \end{itemize}
 
 \subsection{Log-Mel Spectrogram Features}
 
-Log-mel spectrograms are computed using the following process:
+Log-mel spectrograms are computed using the following configuration:
 \begin{itemize}
-    \item Sample Rate: 16,000 Hz
-    \item Number of Mel Bands: 64 frequency bins
-    \item Window Function: Hann window with 25ms window length
-    \item Hop Length: 10ms (50\% overlap)
-    \item Frequency Range: 50-8,000 Hz (optimized for speech)
-    \item Log Scaling: Applied with floor value of -80 dB for dynamic range compression
+\item Sample Rate: 16,000 Hz
+\item Number of Mel Bands: 64 frequency bins
+\item FFT Window Size: 2048 samples (approx. 128ms)
+\item Hop Length: 512 samples (approx. 32ms)
+\item Log Scaling: Power-to-dB conversion with peak reference ()
 \end{itemize}
-
-The resulting spectrogram has shape $(T, F)$ where $T$ is the number of time frames and $F=64$ is the number of frequency bins. Each sample represents approximately 10 milliseconds of audio.
 
 \subsection{Data Augmentation}
 
-To improve model robustness and generalization, the following augmentation techniques are applied:
-
-% TODO: overlap and aggressive augmentation for class 1
+To improve model robustness and generalization, the following augmentation techniques are applied during the data collection phase:
 
 \begin{itemize}
-    \item SpecAugment: Time and frequency masking of the spectrogram
-    \item Speed Perturbation: Varying playback speed to simulate speaking rate variations
-    \item VTLP (Vocal Tract Length Perturbation): Simulating different speaker vocal tract lengths
-    \item Noise Addition: Background noise injection for robustness
-    \item Volume Normalization: Per-sample normalization to reduce volume-based bias
+\item Noise Addition: Gaussian noise injection (supports low and high intensity levels).
+\item Spectral Masking: Time and frequency masking of the spectrogram.
+\item Speed Perturbation: Varying playback speed (e.g., factors 0.9, 1.1).
+\item VTLP (Vocal Tract Length Perturbation): Frequency warping to simulate different vocal tract lengths.
 \end{itemize}
 
-These augmentations help the model learn speaker-specific characteristics rather than audio artifacts.
+\textbf{Data Aggregation Statistics:}
+Total processed audio chunks amounted to 250,066 samples.
+As shown in the processing logs, this resulted in a significant expansion of training data.
+For example, a single recording \textit{KindCowboy} was expanded from 1,405 original chunks to 9,865 chunks through augmentation techniques.
 
-\subsection{Data Loading Optimization}
+\begin{table}[h]
+\centering
+\begin{tabular}{l|c|c|c}
+\textbf{Split} & \textbf{Total Samples} & \textbf{Class 1 (Member)} & \textbf{Class 0 (Outsider)} \\ \hline
+Training & 200,052 & 98,944 & 101,108 \\
+Validation & 24,990 & 12,367 & 12,623 \\
+Testing & 25,024 & 12,370 & 12,654 \\
+\end{tabular}
+\caption{Final Dataset Split Statistics.}
+\label{tab:dataset_stats}
+\end{table}
 
-Two data loading strategies were implemented:
+
+\subsection{Data Loading}
+
+The data loading mechanism utilizes a custom HDF5-based dataset implementation:
 
 \begin{itemize}
-    \item Normal Loader: Standard HDF5 disk-based I/O using DataLoader with multiple workers
-    \item Cached Loader: RAM-cached variant that loads entire dataset into memory at startup (~2-3 seconds), providing \textbf{10-50x speedup} during training
+\item \texttt{LMDataset}: A PyTorch Dataset class that reads log-mel features and labels directly from the HDF5 file on-the-fly.
+\item Dynamic Padding: A custom \texttt{pad\_collate} function is used to handle variable-length sequences by padding them to the maximum time dimension within a batch.
+\item Optimization: DataLoaders are configured with \texttt{pin\_memory} and persistent workers to optimize throughput during training.
 \end{itemize}
 
-The cached loader is recommended for fast iteration, achieving batch iteration times of approximately 10-20ms with batch size 128 on modern GPUs.
+
 
 
 
@@ -202,83 +274,68 @@ The cached loader is recommended for fast iteration, achieving batch iteration t
 The speaker recognition model consists of four main components:
 
 \begin{enumerate}
-    \item \textbf{Backbone}: Feature extraction via CNN and temporal modeling via RNN
+    \item \textbf{Backbone}: Feature extraction via CNN and temporal modeling via RNN with attention mechanisms.
     \item \textbf{Embedding Head}: Projection to fixed-dimensional speaker embeddings
-    \item \textbf{AAMSoftmax}: Classification head with additive angular margin loss
+    \item \textbf{AAMSoftmax}: Classification head with additive angular margin loss (training only)
     \item \textbf{Inference Module}: Deterministic and Monte Carlo dropout-based prediction
 \end{enumerate}
 
-\subsection{Backbone Network}
 
-The backbone network processes log-mel spectrograms to extract speaker-discriminative features:
+\subsection{CNN Block}
+A 3-layer CNN preserves the time axis while compressing frequency features.
+Each layer applies Convolution ($k=3, p=1$), Batch Normalization, ReLU, and a Squeeze-and-Excitation (SE) block for channel reweighting.
 
-\subsubsection{CNN Block}
+\begin{table}[h]
+\centering
+\begin{tabular}{l|l|l}
+\textbf{Layer} & \textbf{Config} & \textbf{Output Shape} \\ \hline
+Input & - & $(B, 1, T, 64)$ \\
+Conv1 & 32 filters, MaxPool(1,2) & $(B, 32, T, 32)$ \\
+Conv2 & 64 filters, MaxPool(1,2) & $(B, 64, T, 16)$ \\
+Conv3 & 128 filters, MaxPool(1,2) & $(B, 128, T, 8)$ \\
+\end{tabular}
+\end{table}
 
+The output is flattened to $(B, T, 1024)$ to serve as input for the temporal block.
+
+\subsection{Temporal Modeling (RNN \& Attention)}
 \begin{itemize}
-    \item Layer 1: Conv2d(1→32, kernel=3, padding=1) + BatchNorm + ReLU + SEBlock + MaxPool(1,2)
-    \item Layer 2: Conv2d(32→64, kernel=3, padding=1) + BatchNorm + ReLU + SEBlock + MaxPool(1,2)
-    \item Layer 3: Conv2d(64→128, kernel=3, padding=1) + BatchNorm + ReLU + SEBlock + MaxPool(1,2)
-    \item Output Shape: $(B, 128, T_{pooled}, F_{pooled})$ where pooling reduces $F$ by 8$\times$
+    \item RNN: Bidirectional GRU (2 layers, 256 hidden units, dropout 0.2). Output dim: 512.
+    \item Pooling: Attentive Statistics Pooling aggregates time frames.
+    It computes a weighted mean and standard deviation using a 128-dim attention bottleneck (employing Tanh and Sigmoid activations),
+    resulting in a fixed 1024-dim vector representing the entire utterance.
 \end{itemize}
 
-\subsubsection{Squeeze-and-Excitation Block}
-
-SE blocks apply channel-wise attention to adaptively reweight feature maps:
-$$\text{SE}(x) = x \odot \sigma(FC_{2}(\text{ReLU}(FC_{1}(\text{GAP}(x)))))$$
-
-where $\text{GAP}$ is global average pooling, $FC$ are fully connected layers, and $\sigma$ is sigmoid.
-
-\subsubsection{RNN Block}
-
+\subsection{Embedding \& Classification}
 \begin{itemize}
-    \item Type: Bidirectional GRU (Gated Recurrent Unit)
-    \item Hidden Dimension: 256 units
-    \item Layers: 2 stacked layers
-    \item Dropout: 0.2 between layers
-    \item Input Dimension: $128 \times (64/8) = 1024$ (flattened CNN output per time frame)
-    \item Output: $(B, T, 512)$ for bidirectional output
+    \item Projection: The pooled vector is projected to a 256-dimensional L2-normalized embedding via an MLP (Linear $\to$ BN $\to$ ReLU $\to$ Linear).
+    \item Loss Function: Additive Angular Margin (AAM) Softmax is used for training to optimize embedding separability.
+    \item Hyperparameters: margin $m=0.25$, scale $s=30.0$.
 \end{itemize}
+To ensure optimal convergence during the initial training phase, the weights of the AAMSoftmax projection head are initialized using the Xavier uniform strategy.
 
-The bidirectional RNN captures both past and future context for each time frame, crucial for speaker modeling.
 
-\subsubsection{Attentive Statistics Pooling}
-
-Instead of simple mean pooling, attention-based statistics pooling is employed:
-
-$$\alpha_t = \tanh(W_{att} \cdot h_t + b_{att})$$
-$$w_t = \text{softmax}(\alpha_t) \quad \text{(with masking for padding)}$$
-$$\mu = \sum_t w_t \odot h_t \quad \text{(weighted mean)}$$
-$$\sigma = \sqrt{\sum_t w_t \odot (h_t - \mu)^2} \quad \text{(weighted variance)}$$
-$$\text{stats} = [\mu; \sigma]$$
-
-This allows the model to focus on informative time frames (e.g., voiced speech) rather than silence or noise.
-
-\subsubsection{Embedding Projection}
-
-The statistics vector is projected to a fixed-dimensional embedding space:
-$$z = \frac{FC_2(\text{ReLU}(\text{BN}(FC_1(\text{stats}))))}{\|FC_2(\cdots)\|}$$
-
-where $FC_1$ projects from $2 \times 512 = 1024$ to 256, and $FC_2$ projects to the final embedding dimension of 256. The embedding is L2-normalized for cosine distance similarity.
-
-\subsection{Classification Head: AAMSoftmax}
-
-Additive Angular Margin (AAM) Softmax is used as the classification head to enhance intra-class compactness and inter-class separability:
-
-$$L_{AAM} = -\frac{1}{N} \sum_i \log \frac{e^{s \cos(\theta_{y_i} + m)}}{e^{s \cos(\theta_{y_i} + m)} + \sum_{j \neq y_i} e^{s \cos(\theta_j)}}$$
-
-where:
-\begin{itemize}
-    \item $\theta$ is the angle between embedding and weight vectors (normalized)
-    \item $s = 30$ is the scaling factor
-    \item $m = 0.25$ is the angular margin (0.25 radians $\approx 14.3°$)
-\end{itemize}
-
-This loss explicitly penalizes incorrect predictions more when they are in the same angular direction as correct predictions, improving class separation in embedding space.
 
 
 
 
 \section{Training Configuration and Methodology}
+
+To rigorously evaluate the architecture's capability and versatility, we implement a \textbf{dual-mode training strategy}.
+We evaluate it under two distinct approaches:
+
+\begin{itemize}
+    \item \textbf{Mode 1: Speaker Authentication}
+    In this mode, the system determines whether a given audio sample belongs to a specific identity.
+    This acts as a binary verification task.
+    \item \textbf{Mode 2: Speaker Identification}
+    In this mode, the system classifies an input audio sample into one of $\numSpeakers{}$ known speaker identities.
+    This tests how well the model can distinguish between different speakers in a closed group.
+\end{itemize}
+
+By implementing both, we ensure the feature extractor is robust and learns clear, useful embeddings for both verification and classification.
+Below, we will walk through the settings used for both.
+
 
 \subsection{Hyperparameters}
 
@@ -293,256 +350,196 @@ This loss explicitly penalizes incorrect predictions more when they are in the s
 Optimizer & AdamW & Adaptive learning with weight decay regularization \\
 Learning Rate & $1 \times 10^{-3}$ & Standard for embedding learning \\
 Weight Decay & $1 \times 10^{-4}$ & L2 regularization for generalization \\
-Batch Size (Train) & 128 & Optimized for 4GB+ GPU memory \\
-Batch Size (Val/Test) & 128 & Large batch for stable validation \\
-Epochs & 30-50 & Early stopping patience: 5 epochs \\
+Batch Size & 256 & Optimized for RAM-cached loading \\
+Epochs & 30 & Early stopping patience: 5 epochs \\
 LR Scheduler & CosineAnnealingLR & Smooth decay over training ($T_{max}=50$) \\
 Loss Function & Cross-Entropy & Standard for classification with AAMSoftmax \\
+Weight Initialization & Xavier Uniform & Ensures stable gradients for AAMSoftmax \\
 \hline
 \end{tabular}
 \end{table}
 
-
-
 \subsection{Regularization Techniques}
 
-The model employs multiple regularization strategies:
+The model employs the following regularization strategies:
 
 \begin{itemize}
-    \item Dropout: 0.2 in RNN layers, 0.3 MC dropout after CNN and in statistics
-    \item Batch Normalization: Before activation functions (at convolutions and projection)
-    \item Weight Decay: $\lambda = 10^{-4}$ in AdamW optimizer
-    \item Data Augmentation: SpecAugment, speed perturbation, VTLP, noise injection
+    \item Dropout: 0.2 in RNN layers; 0.3 Monte Carlo (MC) dropout applied after the CNN block and statistics pooling.
+    \item Batch Normalization: Applied before activation functions in CNN and projection heads.
+    \item Weight Decay: $\lambda = 10^{-4}$ applied via the AdamW optimizer.
+    \item Offline Augmentation: SpecAugment, speed perturbation, and noise injection were applied during dataset creation.
 \end{itemize}
-
-
-
 
 \subsection{Training Loop}
 
-The training pipeline consists of:
+The training pipeline implements Automatic Mixed Precision (AMP) and gradient scaling:
 
 \begin{lstlisting}[caption=Training Loop Structure]
 for epoch in range(1, epochs+1):
-    # Training phase
+    # Training phase with Mixed Precision
     for batch in train_loader:
-        X, y, lengths = batch
         optimizer.zero_grad()
-        with autocast():  # Mixed precision training
+        with autocast():
             logits, embeddings = model(X, y, lengths)
             loss = loss_fn(logits, y)
         scaler.scale(loss).backward()
         scaler.step(optimizer)
         scaler.update()
     
-    # Validation phase
+    # Validation and Checkpointing
     val_loss, val_acc = validate(model, val_loader)
     
-    # Checkpoint and early stopping
     if val_acc > best_val_acc:
         save_checkpoint(model, best_path)
         patience = 0
     else:
         patience += 1
-        if patience >= 5: break
     
-    scheduler.step()  # Update learning rate
+    scheduler.step()
 \end{lstlisting}
-
-
-
 
 \subsection{Mixed Precision Training}
 
-Automatic Mixed Precision (AMP) is enabled using PyTorch's \texttt{autocast()} context manager. This:
+Automatic Mixed Precision (AMP) is enabled using \texttt{torch.cuda.amp.autocast}. This reduces memory footprint and accelerates training on compatible GPUs.
+
+\subsection{Logging}
+
+Metrics are logged to TensorBoard for real-time monitoring:
 \begin{itemize}
-    \item Reduces GPU memory usage by \textbf{30-40\%}
-    \item Accelerates training by \textbf{20-30\%}
-    \item Maintains numerical stability through gradient scaling
+    \item Batch-level: Loss, accuracy, learning rate.
+    \item Epoch-level: Macro-averaged precision, recall, and F1-score.
 \end{itemize}
 
-\subsection{TensorBoard Logging}
-
-Comprehensive metrics are logged per batch and epoch:
-\begin{itemize}
-    \item Per-batch: loss, accuracy, learning rate
-    \item Per-epoch: macro-averaged precision, recall, F1-score, per-class metrics
-    \item GPU/Memory utilization monitoring
-\end{itemize}
-
-This enables real-time monitoring and debugging during training.
 
 
-
-
-
-\section{Advanced Features and Uncertainty Quantification}
-
-\subsection{Monte Carlo Dropout}
-
-Monte Carlo dropout enables uncertainty quantification by performing multiple stochastic forward passes during inference:
-
-$$\hat{z} = \text{MC-Dropout}(x; n_{samples})$$
-$$z_{MC}^{(k)} = \text{dropout}(f(x), p=0.3) \quad \forall k = 1, \ldots, K$$
-$$\mu_{MC} = \frac{1}{K} \sum_{k=1}^K z_{MC}^{(k)}$$
-$$\sigma^2_{MC} = \frac{1}{K} \sum_{k=1}^K (z_{MC}^{(k)} - \mu_{MC})^2$$
-
-The variance provides a measure of model confidence. Lower variance indicates higher confidence in the prediction.
-
-
-
-\subsection{Speaker Verification Pipeline}
-
-The model supports two inference modes:
-
-\begin{enumerate}
-    \item \textbf{Deterministic}: Single forward pass with softmax classification
-    \item \textbf{Monte Carlo}: Multiple passes with uncertainty estimation
-\end{enumerate}
-
-Both methods support:
-\begin{itemize}
-    \item Custom threshold adaptation
-    \item Speaker bank comparison
-    \item Sequence-level aggregation (averaging over multiple segments)
-\end{itemize}
 
 \section{Evaluation and Results}
 
+\subsection{Evaluation Methodology}
+
+The model evaluation pipeline operates in a deterministic mode to ensure reproducibility and stability.
+
+\begin{enumerate}
+    \item Model Loading: The best checkpoint is loaded, and the model is switched to evaluation mode (\texttt{model.eval()}). This explicitly disables stochastic regularization techniques such as Dropout.
+    \item Inference: A single deterministic forward pass is performed for each batch:
+    $$ \hat{y} = \operatorname{argmax}(\text{Softmax}(f(x))) $$
+    \item Performance Optimization: Inference is executed within a \texttt{torch.no\_grad()} context to reduce memory consumption and computational overhead.
+\end{enumerate}
+
 \subsection{Metrics}
 
-Performance is evaluated using:
+Performance is evaluated based on a binary verification task (In-Group vs. Out-Group):
 \begin{itemize}
-    \item Accuracy: Percentage of correct predictions
-    \item Precision: $\frac{\text{True Positives}}{\text{True Positives} + \text{False Positives}}$ per class
-    \item Recall: $\frac{\text{True Positives}}{\text{True Positives} + \text{False Negatives}}$ per class
-    \item F1-Score: Harmonic mean of precision and recall
-    \item Confusion Matrix: Per-class prediction patterns
+    \item Accuracy: Global percentage of correct verifications.
+    \item Precision: The ratio of correctly identified group members to all samples predicted as members.
+    \item Recall: The ratio of correctly identified group members to all actual group members.
+    \item F1-Score: Harmonic mean of precision and recall, ensuring balance between false acceptances and false rejections.
+    \item Confusion Matrix: visualizes False Acceptances (Outsiders classified as Members) and False Rejections (Members classified as Outsiders).
 \end{itemize}
 
-Macro-averaged metrics treat all classes equally, addressing class imbalance issues.
+
+
+\subsection{Computational Performance}
+
+\begin{itemize}
+    \item Hardware: NVIDIA GeForce RTX 3050 Ti Laptop GPU.
+    \item Inference: Real-time processing validated via \texttt{test\_model\_train22.py}.
+\end{itemize}
+
+\textbf{Execution Monitoring}
+
+Inference speed is monitored to ensure real-time capability. The script logs the total inference time and processing speed (samples per second) for the test set.
+
 
 \subsection{Checkpointing}
 
 Two checkpoints are saved during training:
 \begin{itemize}
-    \item \textbf{best\_model.pt}: Model with highest validation accuracy (best for inference)
-    \item \textbf{last\_model.pt}: Final model state (for resuming training)
+    \item best\_model.pt: Saved when validation accuracy peaks (used for final inference).
+    \item last\_model.pt: Saved at the end of the final epoch (for resuming training).
 \end{itemize}
 
-\subsection{Expected Performance}
+\subsection{Training Dynamics for the $1^{st}$ mode: Speaker Authentication}
 
-With the current architecture and training configuration:
-\begin{itemize}
-    \item Training Accuracy: 85-95\% (depending on data quality and augmentation)
-    \item Validation Accuracy: 70-85\% (real-world performance indicator)
-    \item Training Time: \timeRTX{} per epoch on RTX 3050 Ti
-    \item Inference Speed: \interferenceSpeed{} on GPU
-\end{itemize}
-
-
-
-
-\subsection{Training Curves and TensorBoard Visualization}
-
-Figure \ref{fig:training_curves} shows the comprehensive training dynamics across multiple metrics monitored via TensorBoard during model training:
+Figure \ref{fig:training_curves} illustrates the training progression monitored via TensorBoard.
 
 \begin{figure}[H]
 \centering
-\includegraphics[width=1.0\textwidth]{Assets/tensorboard_metrics_graph.png}
-\caption{Comprehensive TensorBoard training metrics showing four key aspects of training dynamics. All metrics are logged per-batch and aggregated per-epoch for detailed monitoring.} 
+\includegraphics[width=1.0\textwidth]{Assets/tensorboard_binary.png}
+\caption{Training metrics over 30 epochs. }
 \label{fig:training_curves}
 \small 
 \begin{itemize}
-    \item \textit{(top-left)} Loss evolution showing training and validation loss decreasing over epochs with good generalization gap;
-    \item \textit{(top-right)} Accuracy progression showing both training and validation accuracy improving from $\sim$20\% to $\sim$85-90\%;
-    \item \textit{(bottom-left)} Learning rate schedule using CosineAnnealingLR that smoothly decays from initial $1 \times 10^{-3}$ to near-zero;
-    \item \textit{(bottom-right)} Macro-averaged F1-scores indicating balanced multi-class performance across all \numSpeakers{} speakers.
+    \item \textit{(top-left)} Loss evolution showing rapid initial convergence;
+    \item \textit{(top-right)} Accuracy progression stabilizing around 85-90\%;
+    \item \textit{(bottom-left)} Learning rate decaying from $1 \times 10^{-3}$ to 0;
+    \item \textit{(bottom-right)} F1-scores indicating balance between Member/Outsider detection.
 \end{itemize}
 \end{figure}
+
+
+\subsection{Uncertainty and Stability Analysis}
+To validate the model's reliability, we analyzed the training and validation metrics with error bars representing the variance introduced by Monte Carlo dropout.
+
+\begin{figure}[H]
+    \centering
+    % Row 1: Accuracy
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Assets/svg/train_acc.png}
+        \caption{Training Accuracy}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Assets/svg/validate_acc.png}
+        \caption{Validation Accuracy (with MC Uncertainty)}
+        \label{fig:val_acc_uncertainty}
+    \end{subfigure}
     
+    \vspace{0.5cm}
+    
+    % Row 2: F1 Macro
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Assets/svg/train_f1_macro.png}
+        \caption{Training F1 Macro}
+    \end{subfigure}
+    \hfill
+    \begin{subfigure}[b]{0.48\textwidth}
+        \centering
+        \includegraphics[width=\linewidth]{Assets/svg/validate_f1_macro.png}
+        \caption{Validation F1 Macro (with MC Uncertainty)}
+    \end{subfigure}
+    
+    \caption{Detailed stability analysis. The error bars in the validation graphs (Right) visualize the predictive uncertainty estimated via Monte Carlo dropout. The tight variance indicates the model is robust to perturbations.}
+    \label{fig:uncertainty_analysis}
+\end{figure}
+
+As shown in Figure \ref{fig:val_acc_uncertainty}, the validation accuracy exhibits initial high variance (larger error bars) which decreases as the model converges, confirming that the network becomes more confident in its feature extraction capabilities over time.
 
 
-\subsubsection{Loss Dynamics}
+\subsection{Loss Dynamics}
 
-The training loss (cross-entropy with AAMSoftmax) exhibits the typical learning curve:
+The training loss (Cross-Entropy with AAMSoftmax) follows three phases:
 \begin{itemize}
-    \item Initial Phase (Epochs 1-5): Rapid loss decrease as the model learns basic speaker-discriminative features
-    \item Middle Phase (Epochs 6-20): Gradual refinement with slower loss reduction as the model approaches the training data optimum
-    \item Late Phase (Epochs 20+): Plateau or slight increase indicating convergence and potential overfitting (managed by early stopping)
-\end{itemize}
-
-The validation loss typically lags behind training loss due to the regularization effects of dropout, batch normalization, and data augmentation. The gap between training and validation loss indicates generalization: a small gap (0.05-0.15) suggests good generalization.
-
-\subsubsection{Accuracy Progression}
-
-The accuracy curves reveal:
-\begin{itemize}
-    \item Training Accuracy: Often reaches 85-95\%, indicating strong speaker discrimination capability
-    \item Validation Accuracy: More conservative at 70-85\%, reflecting real-world performance
-    \item Convergence: Both curves stabilize by epoch 25-30, justifying the 30-epoch default setting
-    \item Generalization Gap: Larger gap (10-15\%) is common in speaker recognition due to limited speaker diversity in small datasets
-\end{itemize}
-
-\subsubsection{Learning Rate Schedule}
-
-The CosineAnnealingLR scheduler implements:
-$$\eta_t = \eta_{min} + \frac{1}{2}(\eta_{max} - \eta_{min})(1 + \cos(\pi t / T_{max}))$$
-
-where:
-\begin{itemize}
-    \item $\eta_{max} = 1 \times 10^{-3}$ (initial learning rate)
-    \item $\eta_{min} = 0$ (final learning rate)
-    \item $T_{max} = 50$ (period, may restart if training continues)
-\end{itemize}
-
-This smooth, cosine-shaped decay helps:
-\begin{itemize}
-    \item Avoid abrupt learning rate drops that can hurt convergence
-    \item Allow fine-tuning adjustments in later epochs
-    \item Implement annealing naturally without manual intervention
+    \item Rapid Descent (Epochs 1-5): The model quickly learns to distinguish silence and broad spectral features.
+    \item Refinement (Epochs 6-20): Slower reduction as the model focuses on specific vocal characteristics (pitch, timbre).
+    \item Convergence (Epochs 20+): Validation loss stabilizes, indicating the limit of the current dataset size.
 \end{itemize}
 
 
+\subsection{Confusion Matrix Analysis}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Assets/in_out_test_binary_noagr.png}
+    \caption{Binary Classification Matrix}
+    \label{fig:conf_matrix_binary}
+\end{figure}
 
+Confusion matrix for the test set shows the low False Acceptance Rate (35 samples) vs False Rejections.
 
-\section{Training Monitoring and Metrics}
-
-\subsection{TensorBoard Integration}
-
-All training metrics are logged to TensorBoard for real-time monitoring:
-
-\begin{table}[H]
-\centering
-\begin{tabular}{|l|l|}
-\hline
-\multicolumn{1}{|c|}{\textbf{Metric Group}} & 
-\multicolumn{1}{c|}{\textbf{Logged Metrics}} \\
-\hline
-\multirow{3}{*}{Per-Batch Metrics} & loss, accuracy, learning rate \\
-& (logged every batch for gradient dynamics) \\
-& \\
-\multirow{3}{*}{Per-Epoch Aggregates} & macro-averaged precision, recall, F1 \\
-& per-class metrics (P, R, F1, support) \\
-& \\
-\multirow{2}{*}{Model State} & validation loss and accuracy \\
-& best validation accuracy tracking \\
-\hline
-\end{tabular}
-\end{table}
-
-TensorBoard event files are saved to \texttt{./logs/TIMESTAMP/} and can be viewed with:
-\begin{lstlisting}
-tensorboard --logdir=./logs
-\end{lstlisting}
-
-This provides interactive visualization of:
-\begin{itemize}
-    \item Scalar metrics (loss, accuracy, learning rate)
-    \item Histograms of weight distributions
-    \item Per-epoch class-wise performance breakdown
-\end{itemize}
 
 \subsection{Per-Class Performance Analysis}
 
@@ -557,80 +554,127 @@ For multi-class speaker recognition, per-class metrics reveal:
 
 The macro-averaged F1-score is the preferred metric as it treats all speakers equally regardless of support.
 
+\subsection{Final Model Performance (Binary Mode)}
 
-
-% this section we probably can delete
-\section{Implementation Highlights and Helper Utilities}
-
-\subsection{Data Loading Utilities}
-
-\textbf{File}: \texttt{data\_utils.py}
-
-Key classes and functions:
-\begin{itemize}
-    \item \texttt{LMDataset}: HDF5-based dataset loader supporting variable-length sequences
-    \item \texttt{CachedLMDataset}: RAM-cached version for 10-50x speedup
-    \item \texttt{pad\_collate()}: Custom collate function for variable-length padding
-    \item \texttt{build\_h5\_loaders()}: Factory function for creating DataLoaders
-    \item Label remapping: Automatic dense label remapping (0...num\_speakers-1)
-\end{itemize}
-
-Features:
-\begin{itemize}
-    \item Support for both (N, F, T) and (N, T, F) data layouts
-    \item Optional length tensor for packed sequence processing
-    \item Configurable pad value (-80 dB for silence)
-    \item Memory-efficient HDF5 file handling with lazy loading
-\end{itemize}
-
-\subsection{Model Architecture Code}
-
-\textbf{File}: \texttt{test\_model\_train22.py}
-
-The production model code includes:
-\begin{itemize}
-    \item \texttt{SEBlock}: Squeeze-and-Excitation attention mechanism
-    \item \texttt{Backbone}: CNN-RNN feature extractor with attention pooling
-    \item \texttt{AAMSoftmax}: Angular margin softmax classification head
-    \item \texttt{SpeakerClassifier}: High-level inference API
-\end{itemize}
-
-Methods:
-\begin{itemize}
-    \item \texttt{embed()}: Deterministic embedding extraction
-    \item \texttt{mc\_embed()}: Multiple stochastic embeddings for uncertainty
-    \item \texttt{verify\_any()}: Speaker verification with custom bank
-    \item \texttt{mc\_verify\_any()}: Uncertainty-aware verification
-    \item \texttt{infer()}: High-level speaker identification
-\end{itemize}
-
-\subsection{Training Utilities}
-
-\textbf{Functions}: \texttt{train\_one\_epoch()}, \texttt{validate()}
-
-Features:
-\begin{itemize}
-    \item Comprehensive metric computation (precision, recall, F1 per class)
-    \item TensorBoard logging of all metrics
-    \item GPU memory and time profiling
-    \item Gradient scaler for mixed precision training
-    \item Efficient batch processing with non-blocking GPU transfers
-\end{itemize}
-
-\subsection{Checkpoint Management}
+The final evaluation on the test set (20,948 samples) yielded robust results for the security-critical task of speaker authentication.
 
 \begin{itemize}
-    \item \texttt{prepare\_save\_dir()}: Auto-incrementing checkpoint directories
-    \item \texttt{save\_checkpoint()}: State-dict only saves (minimal, robust)
-    \item Early stopping with configurable patience
-    \item Support for local and Google Drive backup
+    \item Global Accuracy: $98.74\%$
+    \item False Acceptance Rate (FAR): $0.20\%$ (Only 35 unauthorized chunks accepted out of 17,856).
+    \item False Rejection Rate (FRR): $7.41\%$ (229 authorized chunks rejected).
+    \item Equal Error Rate (EER): $\approx 3.80\%$
 \end{itemize}
+
+These metrics indicate a highly secure system, which is ideal for security applications where rejecting an authorized useris preferred over admitting an intruder.
+
+\begin{table}[h]
+\centering
+\begin{tabular}{l|c|c|c|c}
+\textbf{Class} & \textbf{Precision} & \textbf{Recall} & \textbf{F1-Score} & \textbf{Support} \\ \hline
+Outsider (0) & 0.9873 & 0.9980 & 0.9926 & 17,856 \\
+Member (1) & 0.9879 & 0.9259 & 0.9559 & 3,092 \\ \hline
+\textbf{Weighted Avg} & \textbf{0.9874} & \textbf{0.9874} & \textbf{0.9872} & \textbf{20,948} \\
+\end{tabular}
+\caption{Detailed Classification Report for Binary Model.}
+\label{tab:binary_results}
+\end{table}
+
+
+
+
+
+
+
+
+\section{$2^{nd}$ mode: Multi-Speaker Identification}
+
+This experiment evaluates the model's ability to classify specific identities among the \numSpeakers{} registered speakers.
+
+\subsection{Metrics}
+
+Performance is evaluated based on an \numSpeakers{}-way classification task:
+\begin{itemize}
+    \item Top-1 Accuracy: The percentage of test samples where the correct speaker had the highest probability score.
+    \item Macro-F1 Score: The arithmetic mean of per-speaker F1-scores. This is the primary metric as it penalizes the model for neglecting speakers with fewer training samples (class imbalance).
+    \item Per-Class Precision/Recall:
+    \begin{itemize}
+        \item Precision: reliability of predicting specific speaker $S_i$.
+        \item Recall: ability to find all samples of speaker $S_i$.
+    \end{itemize}
+    \item Confusion Matrix ($\numSpeakers{} \times \numSpeakers{}$): Visualizes misclassifications between specific speaker pairs (e.g., confusing Speaker A with Speaker B due to similar pitch).
+\end{itemize}
+
+\subsection{Expected Performance}
+
+Based on the multi-class architecture ($Chance = 1/\numSpeakers{}$):
+\begin{itemize}
+    \item Training Accuracy: 90-98\% (Deep separation of speaker identities).
+    \item Validation Accuracy: 80-90\% (Dependent on number of classes and acoustic similarity).
+    \item Inference Latency: Comparable to binary mode (approx. \interferenceSpeed{}), as the only difference is the output layer dimension.
+\end{itemize}
+
+\subsection{Training Dynamics}
+
+Figure \ref{fig:training_curves_multi} illustrates the training progression for the multi-speaker task.
+
+\begin{figure}[H]
+\centering
+\includegraphics[width=1.0\textwidth]{Assets/tensorboard_multi.png}
+\caption{Multi-Speaker Classification: Training metrics over 30 epochs.}
+\label{fig:training_curves_multi}
+\small 
+\begin{itemize}
+    \item \textit{(top-left)} Loss starts high and decays rapidly.
+    \item \textit{(top-right)} Accuracy climbs from near-zero to plateau.
+    \item \textit{(bottom-left)} Macro-Precision improves steadily for training and validation sets.
+    \item \textit{(bottom-right)} Macro-F1 curve reveals if the model is learning all speakers or just the dominant ones.
+\end{itemize}
+\end{figure}
+
+
+\subsection{Confusion Matrix Analysis}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=\textwidth]{Assets/in_out_test_multi_noagr.png}
+    \caption{Speaker Identification Matrix}
+    \label{fig:conf_matrix_multi}
+
+\end{figure}
+Confusion matrix with detailed speaker-to-speaker misclassifications.
+
+\subsection{Per-Class Performance Analysis}
+
+The multi-class evaluation highlights specific acoustic modeling challenges:
+\begin{itemize}
+    \item Class Imbalance: Speakers with limited audio data may show lower Recall scores.
+    \item Acoustic Similarity: The Confusion Matrix typically shows clusters of errors among speakers with similar vocal tract lengths or fundamental frequencies.
+    \item Support Bias: Macro-averaged metrics are monitored to ensure the model does not overfit to the speakers with the most recording time.
+\end{itemize}
+
+
+
+\section{Implementation Summary}
+
+The system is implemented using PyTorch with HDF5 for memory-efficient data handling. The pipeline consists of three main stages:
+
+\begin{itemize}
+    \item Data Pipeline: Utilizes lazy loading for variable-length sequences, employing dynamic padding and automatic dense label remapping for efficient batch processing.
+    \item Model Architecture:
+    Features a CNN-RNN backbone enhanced with Squeeze-and-Excitation (SE) blocks for channel-wise attention.  The classification head uses AAMSoftmax (Angular Additive Margin) to optimize intra-class compactness and inter-class separability. 
+    \item Inference \& Evaluation: The inference engine provides an API for speaker verification using cosine similarity against a pre-calculated weight bank.
+\end{itemize}
+
+
+
+
+
 
 
 
 \section{Course Requirements Coverage}
 
-The project implements and documents the following 10 advanced ML concepts (exceeding the required 8):
+The project implements and documents the following 10 advanced ML concepts :
 
 \begin{table}[H]
 \centering
@@ -643,9 +687,9 @@ The project implements and documents the following 10 advanced ML concepts (exce
 1 & Data augmentation \& quality enhancement & SpecAugment, speed, VTLP, silence removal \\
 2 & Input length \& normalization & Log-mel features, volume normalization \\
 3 & Layer configuration & 3 CNN + 2-layer GRU + SE blocks \\
-4 & Optimizers \& schedules & AdamW, SGD, CosineAnnealingLR \\
+4 & Optimizers \& schedules & AdamW, CosineAnnealingLR \\
 5 & Batch normalization & Before activations in CNN and projection \\
-6 & Skip connections & SE blocks with residual attention \\
+6 & Non-conservative technique & Squeeze-and-Excitation \& Attention Pooling \\
 7 & Dropout & 0.2 in RNN, 0.3 MC dropout \\
 8 & MC dropout uncertainty & Stochastic embeddings, variance estimation \\
 9 & Activation functions & ReLU, Sigmoid in attention, Tanh \\
@@ -663,13 +707,15 @@ This project demonstrates a production-grade speaker recognition system combinin
 \newline Key Achievements:
 
 \begin{itemize}
-    \item Implemented a sophisticated speaker recognition model exceeding course requirements
-    \item Achieved 10-50x speedup through RAM caching strategies
-    \item Integrated uncertainty quantification via Monte Carlo dropout
-    \item Created comprehensive evaluation pipeline with detailed metrics
-    \item Developed robust data preprocessing with multiple augmentation strategies
+    \item Implemented a sophisticated speaker recognition model.
+    \item Achieved 10-50x speedup through RAM caching strategies.
+    \item Implemented Automatic Mixed Precision (AMP) to accelerate training.
+    \item Created comprehensive evaluation pipeline with detailed metrics.
+    \item Developed robust data preprocessing with multiple augmentation strategies.
+    \item Designed a dual-mode training strategy for authentication and identification tasks.
 \end{itemize}
 
+\noindent This implementation fulfilled 10 advanced machine learning concepts, exceeding the core requirements of the Introduction to Machine Learning course
 
 
 
@@ -679,29 +725,50 @@ The development of this project was a collaborative effort. The specific contrib
 
 \begin{table}[H]
 \centering
-\begin{tabular}{|l|p{10cm}|}
+\begin{tabular}{|l|p{13cm}|}
 \hline
 \multicolumn{1}{|c|}{\textbf{Team Member}} & 
 \multicolumn{1}{c|}{\textbf{Contributions}} \\
 \hline
-Aleksander Jeżowski & \textit{} \\
+Aleksander Jeżowski & 
+    \textit{Recordings preparation, 
+    exploratory data analysis,
+    performance metric analysis, 
+    experimental results validation,
+    system documentation} \\
 \hline
-Mantas Mikulskis & \textit{} \\
+Mantas Mikulskis &
+    \textit{Recordings preparation, 
+    data engineering pipeline,
+    augmentation design,
+    dataloader implementation} \\
 \hline
-Michał Kozickki & \textit{} \\
+Michał Kozicki &
+    \textit{Recordings preparation, 
+    core model architecture design,
+    hybrid CNN-RNN implementation,
+    attention mechanism integration} \\
+\hline  
+Piotr Czechowski &
+    \textit{Recordings preparation, 
+    training loop optimization,
+    hyperparameters configuration,
+    accuracy evaluation,
+    dual-mode implementation (Authentication vs. Identification),
+    functionality restoration} \\
+
 \hline
-Piotr Czechowski & \textit{} \\
-\hline
-Rafał Lasota & \textit{} \\
+Rafał Lasota &
+    \textit{Recordings preparation, 
+    exploratory data analysis,
+    client application and UI,
+    real-time audio processing,
+    integration testing} \\
 \hline
 \end{tabular}
-\caption{Breakdown of individual contributions to the project.}
+\caption{Breakdown of individual contributions.}
 \end{table}
 
 
-\section*{Acknowledgments}
-
-This project was developed by a team of students: Aleksander, Mantas, Michał, Piotr, Rafał as the final deliverable for the Introduction to Machine Learning course.
-We thank the instructors for their guidance and feedback throughout the project development.
 
 \end{document}
