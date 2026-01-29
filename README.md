@@ -25,13 +25,35 @@ The app serves as a visualization of the inference results of the machine learni
 
 ## Installation and Usage
 
-TODO: this section
-<br>
-<br>
-<br>
-<br>
-<br>
-<br>
+Firstly, launch the server.
+
+```bash
+cd backend
+```
+
+If this is the first time launching, create a venv/conda and
+```bash
+pip install -r requirements.txt
+```
+
+Then
+```bash
+uvicorn main:app --host localhost --port 8000                                                                                                ─╯
+```
+
+Then, in another terminal window launch the client.
+```bash
+cd frontend
+```
+If this is the first time launching,
+```bash
+npm install
+```
+
+Then
+```bash
+npm run dev
+```
 
 ## Report
 
