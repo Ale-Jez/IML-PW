@@ -7,6 +7,7 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{fancyhdr}
+\usepackage{titlesec}
 \usepackage{hyperref}
 \usepackage{listings}
 \usepackage{svg}
@@ -15,6 +16,7 @@
 \usepackage{float}
 \usepackage{multirow}
 \usepackage{subcaption}
+\usepackage{float}
 
 % --- CONFIGURATION / CONSTANTS ---
 \newcommand{\numSpeakers}{58} 
@@ -39,10 +41,20 @@
     numberstyle=\tiny,
 }
 
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+
 \pagestyle{fancy}
 \fancyhf{}
 \rhead{\thepage}
 \lhead{Speaker Recognition - Final Report}
+
+
+
 
 \title{\textbf{Speaker Recognition using CNN-RNN Architecture}\\
     Introduction to Machine Learning Course\\
@@ -50,6 +62,8 @@
 \author{Aleksander Jeżowski, Mantas Mikulskis, \\
  Michał Kozicki, Piotr Czechowski, Rafał Lasota}
 \date{January 2026}
+
+
 
 \begin{document}
 
@@ -98,18 +112,15 @@ Specifically, we aim to achieve high performance through \textbf{dual-mode train
 \subsection{Dataset}
 
 The dataset consists of voice recordings from \numSpeakers{} speakers. 
-Dataset consists of two classes of speakers:
+The dataset consists of two classes of speakers:
 \begin{itemize}
     \item Class 0: speakers who are not allowed to enter.
     \item Class 1: speakers who are allowed to enter. It consists of team members: Aleksander, Mantas, Michał, Piotr, Rafał.
 \end{itemize}    
 
 Voice data was stored in various formats (WAV, MP3, M4A), afterwards converted to WAV format to increase the speed of loading the data.
-Dataset is preprocessed into log-mel spectrograms.
+The dataset is preprocessed into log-mel spectrograms.
 The data is split into training \train{}, validation \validate{}, and test \test{} sets, stored in HDF5 format for efficient access during training.
-
-
-
 
 
 
@@ -154,7 +165,7 @@ To validate the integrity of the data pipeline, we analyzed the relationship bet
 Fig. \ref{fig:chunk_analysis} (left) demonstrates a strong linear correlation between duration and chunk count.
 
 However, the distribution of chunks per second (Fig. \ref{fig:chunk_analysis}, right) reveals a mean extraction rate  higher than the expected $1.0$.
-This results in requirement for normalization during the loading phase.
+This results in a requirement for normalization during the loading phase.
 
 \begin{figure}[h]
     \centering
@@ -194,9 +205,6 @@ The projection shows that the \textit{Allowed} speakers (green) are not clustere
 This lack of linear separability confirms that shallow models (like Logistic Regression) would fail, justifying the choice of a deep architecture such as ours. 
 
 
-
-
-
 \section{Data Preprocessing and Feature Extraction}
 
 \subsection{Audio Processing Pipeline}
@@ -220,7 +228,7 @@ Log-mel spectrograms are computed using the following configuration:
 \item Number of Mel Bands: 64 frequency bins
 \item FFT Window Size: 2048 samples (approx. 128ms)
 \item Hop Length: 512 samples (approx. 32ms)
-\item Log Scaling: Power-to-dB conversion with peak reference ()
+\item Log Scaling: Power-to-dB conversion with peak reference
 \end{itemize}
 
 \subsection{Data Augmentation}
@@ -235,7 +243,7 @@ To improve model robustness and generalization, the following augmentation techn
 \end{itemize}
 
 \textbf{Data Aggregation Statistics:}
-Total processed audio chunks amounted to 250,066 samples.
+Total processed audio chunks amounted to 250,066 segments.
 As shown in the processing logs, this resulted in a significant expansion of training data.
 For example, a single recording \textit{KindCowboy} was expanded from 1,405 original chunks to 9,865 chunks through augmentation techniques.
 
@@ -261,8 +269,6 @@ The data loading mechanism utilizes a custom HDF5-based dataset implementation:
 \item Dynamic Padding: A custom \texttt{pad\_collate} function is used to handle variable-length sequences by padding them to the maximum time dimension within a batch.
 \item Optimization: DataLoaders are configured with \texttt{pin\_memory} and persistent workers to optimize throughput during training.
 \end{itemize}
-
-
 
 
 
@@ -381,7 +387,7 @@ Weight Initialization & Xavier Uniform & Ensures stable gradients for AAMSoftmax
 The model employs the following regularization strategies:
 
 \begin{itemize}
-    \item Dropout: 0.2 in RNN layers; 0.3 Monte Carlo (MC) dropout applied after the CNN block and statistics pooling.
+    \item Dropout: 0.2 in RNN layers, 0.3 Monte Carlo (MC) dropout applied after the CNN block and statistics pooling.
     \item Batch Normalization: Applied before activation functions in CNN and projection heads.
     \item Weight Decay: $\lambda = 10^{-4}$ applied via the AdamW optimizer.
     \item Offline Augmentation: SpecAugment, speed perturbation, and noise injection were applied during dataset creation.
@@ -489,7 +495,7 @@ Figure \ref{fig:training_curves} illustrates the training progression monitored 
 \begin{itemize}
     \item \textit{(top-left)} Loss evolution showing rapid initial convergence;
     \item \textit{(top-right)} Accuracy progression stabilizing around 85-90\%;
-    \item \textit{(bottom-left)} Learning rate decaying from $1 \times 10^{-3}$ to 0;
+    \item (\textit{bottom-left}) Precision metric illustrating increase from $\sim30\%$ to over 80\%;
     \item \textit{(bottom-right)} F1-scores indicating balance between Member/Outsider detection.
 \end{itemize}
 \end{figure}
@@ -683,88 +689,109 @@ The system is implemented using PyTorch with HDF5 for memory-efficient data hand
 \end{itemize}
 
 
-\subsection{Intended Impact and Measured Effects of Key Design Choices}
-
+\subsection{Intended Impact and Measured Effects of Key Design Choices} 
 This subsection provides a structured analysis of the major architectural and training techniques used in the model. For each technique, we first outline its principle and intended impact on training dynamics or performance. We tested their actual impact by training a model without the use of each technique and compared the changes to baseline.
 
-\paragraph{Data Augmentation \& Quality Enhancement}
+
+\paragraph{Data Augmentation \& Quality Enhancement} 
 Data augmentation techniques such as SpecAugment, speed perturbation, VTLP, and silence removal are designed to artificially increase dataset diversity while preserving speaker identity. The intended impact is to improve generalization to unseen speakers and recording conditions, reduce overfitting, and stabilize validation metrics, especially in low- to medium-data regimes.
 
-\textit{Measured impact (to be completed):}
+\textit{Measured impact:}
 \begin{itemize}
-    \item Validation accuracy change: $\pm$ XX \%
-    \item Macro F1-score change: $\pm$ XX
-    \item Generalization gap (train–val) change: $\pm$ XX \%
-    \item Convergence speed (epochs to plateau): $\pm$ XX epochs
+    \item Validation accuracy change:
+     $-1.76\%$ (Dropped to $96.25\%$ without augmentation vs $98.01\%$ baseline)
+    \item Macro F1-score change: $-0.057$ (Dropped to $0.9228$ without augmentation vs $0.9801$ baseline)
+    \item False Rejection Rate (FRR) Impact: Without augmentation, FRR spiked to $15.91\%$ compared to $2.97\%$ in the baseline.
+    % \item Generalization gap (train-val) change: \textit{Data not available in logs}
+    % \item Convergence speed (epochs to plateau): \textit{Data not available in logs}
 \end{itemize}
-
-
 \textbf{Conclusion}
+The study confirms that data augmentation is critical for model reliability.
+While raw accuracy only dropped by $\approx 1.8\%$, the security metrics suffered strictly:
+the False Rejection Rate (FRR) increased nearly 5-fold (from $2.97\%$ to $15.91\%$). This indicates that without augmentation, the model fails to generalize to legitimate user variations, leading to a high rate of denying access to authorized users.
 
 
-
-\paragraph{Optimizer Comparison: SGD vs. AdamW}
+\paragraph{Optimizer Comparison: SGD vs. AdamW} \mbox{} \\
 Stochastic Gradient Descent (SGD) with momentum and AdamW represent two fundamentally different optimization strategies. SGD performs parameter updates using a global learning rate and accumulated momentum, which often leads to strong generalization but slower convergence and higher sensitivity to learning-rate tuning. AdamW, in contrast, adapts learning rates per parameter and decouples weight decay from gradient updates, with the intended impact of faster convergence, improved stability in early training, and reduced sensitivity to hyperparameter choices, particularly in deep architectures.
 
-\textit{Measured impact (to be completed):}
+\textit{Measured impact:}
 \begin{itemize}
-    \item Initial convergence speed (epochs to reach XX\% accuracy): SGD XX / AdamW XX
-    \item Final validation accuracy difference: AdamW $-$ SGD = $\pm$ XX \%
-    \item Macro F1-score difference: AdamW $-$ SGD = $\pm$ XX
-    \item Training stability (std. dev. of val accuracy): SGD XX / AdamW XX
-    \item Mean epoch time difference: AdamW $-$ SGD = $\pm$ XX ms
+    \item Final validation accuracy difference: AdamW $+2.07\%$ ($98.01\%$ vs SGD $95.94\%$)
+    \item Macro F1-score difference: AdamW $+0.02$ ($0.9801$ vs SGD $0.9594$)
+    \item Equal Error Rate (EER): AdamW achieved $0.0200$ vs SGD $0.0405$ (SGD error rate was double).
+    % \item Initial convergence speed: \textit{Data not available in logs}
+    % \item Training stability: \textit{Data not available in logs}
 \end{itemize}
-
-
 \textbf{Conclusion}
+AdamW significantly outperformed SGD in this task. Beyond the accuracy gain, the security implications were profound: SGD suffered from a False Acceptance Rate (FAR) of $5.02\%$, whereas AdamW reduced this to $1.02\%$. This suggests that the adaptive learning rates of AdamW are better suited for the complex loss landscape of the AAMSoftmax objective, resulting in a much tighter decision boundary against impostors.
 
 
 \paragraph{Learning Rate Scheduling: OneCycleLR vs. CosineAnnealingLR}
 OneCycleLR and CosineAnnealingLR embody two different philosophies of learning-rate control. OneCycleLR aggressively increases the learning rate early in training and then rapidly anneals it, with the intended effect of faster exploration, implicit regularization, and reduced total training time. CosineAnnealingLR, by contrast, smoothly decays the learning rate following a cosine curve, aiming for stable convergence and fine-grained optimization in later epochs, particularly beneficial for metric-learning objectives.
 
-\textit{Measured impact (to be completed):}
+\textit{Measured impact:}
 \begin{itemize}
-    \item Epochs to peak validation accuracy: OneCycleLR XX / CosineAnnealingLR XX
-    \item Peak validation accuracy difference: CosineAnnealingLR $-$ OneCycleLR = $\pm$ XX \%
-    \item Validation loss smoothness (variance across epochs): OneCycleLR XX / CosineAnnealingLR XX
-    \item Generalization gap (train–val accuracy): OneCycleLR XX / CosineAnnealingLR XX
-    \item Total training time difference: CosineAnnealingLR $-$ OneCycleLR = $\pm$ XX min
+    % \item Epochs to peak validation accuracy: \textit{Data not available in logs}
+    \item Peak validation accuracy difference:
+    CosineAnnealingLR $-$ OneCycleLR = 
+    \newline $+4.02\%$ (98.01\% vs 93.99\% with AdamW)
+    % \item Validation loss smoothness (variance across epochs): \textit{Data not available in logs}
+    % \item Generalization gap (train-val accuracy): \textit{Data not available in logs}
+    % \item Total training time difference: \textit{Data not available in logs}
 \end{itemize}
-
-
 \textbf{Conclusion}
+CosineAnnealingLR significantly outperformed OneCycleLR in this architecture.
+While OneCycleLR aims for faster convergence, in this experiment it degraded performance, yielding an accuracy of only 93.99\% compared to 98.01\% with Cosine Annealing.
+Crucially, the Equal Error Rate (EER) was much higher with OneCycle (6.02\%) compared to Cosine (1.98\%), suggesting that the aggressive learning rate shifts of OneCycleLR may destabilize the optimization of the angular margin loss function.
 
 
 \paragraph{Monte Carlo Dropout for Uncertainty Estimation}
 MC dropout enables stochastic forward passes during evaluation to estimate predictive uncertainty. The intended impact is not to improve raw accuracy, but to quantify model confidence and assess stability of learned embeddings across perturbations.
 
-\textit{Measured impact (to be completed):}
+\textit{Measured impact:}
 \begin{itemize}
-    \item Mean predictive variance (early vs late epochs): $\downarrow$ XX \%
-    \item Correlation between uncertainty and errors: XX
-    \item Deterministic accuracy change: $\pm$ XX \%
+    \item \textbf{Accuracy degradation:} The use of MC Dropout during inference drastically reduced accuracy to $44.49\%$ (compared to $\approx 98\%$ in the deterministic model).
+    \item \textbf{Uncertainty Separation:} Poor. The Uncertainty Ratio (Incorrect/Correct) was $0.998$, meaning the model was equally "uncertain" about correct predictions ($0.03023 \pm 0.0005$) as it was about incorrect ones ($0.03016 \pm 0.0005$).
+    \item \textbf{Agreement Score:} The agreement between stochastic passes was $0.68$ for correct predictions and $0.69$ for incorrect ones, showing a difference of $-0.015$, indicating that stability across passes did not correlate with correctness.
 \end{itemize}
 
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Assets/monte.png}
+    \caption{Monte Carlo Dropout Uncertainty Distribution. The high overlap between green (Correct) and red (Incorrect) histograms indicates poor separability based on uncertainty.}
+    \label{fig:monte_dist}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1.0\linewidth]{Assets/monte2.png}
+    \caption{Uncertainty Threshold Analysis. While an agreement score threshold of $\ge 0.80$ was identified to maintain coverage, the overall accuracy penalty remains too high.}
+    \label{fig:monte_threshold}
+\end{figure}
 
 \textbf{Conclusion}
+The implementation of Monte Carlo Dropout in this architecture was \textbf{ineffective} for uncertainty estimation. The experimental data shows that the model's embeddings are highly sensitive to dropout perturbations, leading to a massive drop in accuracy ($<45\%$) without yielding a discriminative uncertainty signal. As shown in Figure \ref{fig:monte_dist}, the distributions for correct and incorrect predictions overlap almost completely. Consequently, MC Dropout is not recommended for the final deployment of this specific model, as the "Agreement Score" (Figure \ref{fig:monte_threshold}) failed to act as a reliable proxy for prediction correctness.
 
 
 
-\paragraph{Weight Initialization}
-Xavier uniform initialization in the AAMSoftmax head is intended to ensure balanced variance propagation and prevent early saturation of angular margins. This supports stable early training and consistent classifier convergence.
 
-\textit{Measured impact (to be completed):}
+\paragraph{Weight Initialization: Xavier vs. Kaiming}
+
+We compared the default Xavier uniform initialization against Kaiming (He) initialization.
+While Xavier is effective for keeping signal variance constant in linear layers, Kaiming initialization is theoretically optimized for networks using ReLU activations . 
+% The intended impact of switching to Kaiming is to better preserve signal magnitude through deep layers, preventing the vanishing gradient problem during the critical early epochs of training.
+
+\textit{Measured impact:}
 \begin{itemize}
-    \item Initial training loss (epoch 1) change: $\pm$ XX
-    \item Epochs to stable margin separation: $\pm$ XX epochs
-    \item Final validation accuracy change: $\pm$ XX \%
+    \item Final validation accuracy change: Kaiming $+4.22\%$ ($98.21\%$ vs $93.99\%$ Default/Xavier)
+    \item Equal Error Rate (EER) reduction: Kaiming reduced error by over $4\%$ ($1.78\%$ vs $6.02\%$ Default/Xavier)
+    \item False Acceptance Rate (FAR): Reduced by half ($2.47\%$ Kaiming vs $5.19\%$ Default/Xavier)
+    \item False Rejection Rate (FRR): Dramatic improvement ($1.10\%$ Kaiming vs $6.86\%$ Default/Xavier)
 \end{itemize}
-
-
-
 \textbf{Conclusion}
-
-
+The choice of initialization had a substantial impact on final performance. Kaiming initialization outperformed the default Xavier initialization.
+Furthermore, Kaiming initialization achieved the lowest recorded EER,
+ indicating it provides a much better starting point for minimizing the AAMSoftmax loss in this specific deep architecture.
 
 \paragraph{Summary}
 These techniques were selected to jointly optimize convergence speed, robustness, discriminative power, and interpretability. Filling in the above templates enables a transparent, quantitative assessment of how each design decision contributed to the final system performance.
@@ -795,7 +822,7 @@ The project implements and documents the following 10 advanced ML concepts :
 7 & Dropout & 0.2 in RNN, 0.3 MC dropout \\
 8 & MC dropout uncertainty & Stochastic embeddings, variance estimation \\
 9 & Activation functions & ReLU, Sigmoid in attention, Tanh \\
-10 & Weight initialization & Xavier uniform in AAMSoftmax \\
+10 & Weight initialization & He initialization in AAMSoftmax \\
 \hline
 \end{tabular}
 \end{table}
@@ -848,7 +875,7 @@ Mantas Mikulskis &
 Michał Kozicki &
     \textit{Recordings preparation, 
     model architecture design,
-    implementation of the hybrid CNN-RNN with AASM head, and
+    implementation of the hybrid CNN-RNN with AAMSoftmax head, and
     the training, testing, and inference methods,
     wiring with TensorBoard
     } \\
