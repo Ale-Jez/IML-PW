@@ -1,122 +1,49 @@
 # Introduction to Machine Learning
 
+This is the repository for Introduction to Machine Learning course conducted at the Warsaw University of Technology during the winter semester 2025/26. 
+It contains the project focused on voice analysis using machine learning methods.
+The project was developed by a team of students:
+- Aleksander Jeżowski
+- Mantas Mikulskis
+- Michał Kozicki
+- Piotr Czechowski
+- Rafał Lasota
 
-## Requirements for the Milestone #3
+This GitHub repository was created relatively lately, thus the commit history does not reflect actual workload,
+which has been described in the section titled *Team Contributions* in the report for this project.
 
-- Improvement in comparison to Milestone #2 (3 points)
-- Report (2 points)
+---
 
+## Client App
 
+The repository includes a functional client application located in the `client` folder. This application demonstrates the practical performance of our trained models and operates in two distinct modes:
 
-### Things to cover in code AND report:
+* **Binary Classification:** Determines whether a voice sample belongs to a specific category using our binary classification model.
+* **Speaker Identification:** Analyzes the voice input to identify the specific speaker from a known set of individuals using our multi-class identification model.
 
-1. data augmentation, including quality enhancements: removing silent passages from the training data,
-2. choosing the length of a single excerpt, input normalization,
-3. changing the number and size of the layers,
-4. different optimizers (SGD, Adam), learning rate schedule, weight decay,
-5. batch normalization (before vs after activations),
-6. skip connections,
-7. dropout,
-8. Monte Carlo dropout for uncertainty measurement,
-9. activation functions (ReLU, sigmoid) tested against diMerent weight,
-10. initializations (Xavier, He, uniform)
-11. a comparison to pre-trained models (transfer learning, ﬁne-tuning).
+The app serves as a visualization of the inference results of the machine learning pipeline developed in this project.
 
-Your project needs to cover any eight (8) of the above-listed points to be considered for
-5.0 grade,
-any ﬁve (5) to be considered for 4.0 grade,
-and any three (3) to be considered
-for 3.0 grade.
+## Installation and Usage
 
-
-Moreover, **report** should contain a section with description of the work done by each group member.
-
+TODO: this section
+<br>
+<br>
+<br>
+<br>
+<br>
 <br>
 
-### Currently we have: 
+## Report
 
-- [x] data augmentation, including quality enhancements: removing silent passages from the training data,
-- [x] choosing the length of a single excerpt, input normalization,
-- [ ] changing the number and size of the layers,
-- [x] different optimizers (SGD, Adam), learning rate schedule, weight decay, (partially)
-- [ ] batch normalization (before vs after activations),
-- [ ] skip connections,
-- [x] dropout,
-- [x] Monte Carlo dropout for uncertainty measurement,
-- [ ] activation functions (ReLU, sigmoid) tested against diMerent weight,
-- [ ] initializations (Xavier, He, uniform)
-- [ ] a comparison to pre-trained models (transfer learning, ﬁne-tuning).
+A comprehensive report detailing our methodology, architecture choices, experimental results, and team contributions is available as a pdf file in the `REPORT` folder.
 
-But keep in mind that many of these require <u> explicit comparison tests</u> and documentation in the report to fully count.
+## Project Structure
+
+In addition to the final report and the client application, this repository contains the complete source code used throughout the project lifecycle, mainly files in `.py` and `.ipynb` formats. Mainly including:
+
+- **Data Preprocessing:** Scripts for cleaning and normalizing audio data.
+- **Feature Extraction:** Code used to generate spectrograms, MFCCs, or other voice features.
+- **Model Training:** Notebooks and scripts used to train, tune, and evaluate the models.
 
 
 
-<br><br>
-
-# Workplan
-
-It was generated using AI, therefore please keep in mind that there might be some mistakes. 
-I altered it in a way, and added some additional points but still be careful.
-Also feel free to modify it. For now it's just a rough estimation what we can do.
-
-
-
-## 1. Requirement Completion
-
-Current status: ~5 points implemented in code. We need 3 more + documentation/comparison for all. (Target: 8 points for 5.0)
-
-- [ ] Point 3: Layer Scaling Comparison
-    - [ ] Modify `Backbone` to easily swap the number of CNN filters or GRU hidden units.
-    - [ ] Run at least two variations (e.g., "Lightweight" vs "Deep") and compare performance.
-- [ ] Point 4: Optimizer & Schedule Comparison
-    - [ ] You have SGD and AdamW implemented. You must run a test comparing them.
-    - [ ] Document the effect of the `CosineAnnealingLR` schedule vs. a fixed learning rate.
-- [ ] Point 5: Batch Normalization Placement
-    - [ ] Current code places BN **before** ReLU.
-    - [ ] Create a version with BN **after** the activation function.
-    - [ ] Run a comparison test and document which performed better.
-- [ ] Point 9: Activation Function Testing
-    - [ ] Compare the current ReLU/Sigmoid mix against a version using LeakyReLU or ELU.
-    - [ ] Document the impact on training stability.
-- [ ] Point 10: Initialization Comparison
-    - [ ] Current `AAMSoftmax` uses `xavier_uniform_`. 
-    - [ ] Test the `Backbone` layers with `He` (Kaiming) vs. `Uniform` initializations.
-- [ ] Point 11: Transfer Learning (High Impact)
-    - [ ] Implement a comparison against a pre-trained model (e.g., a pre-trained ResNet or VGG adapted for audio/spectrograms).
-
-
-- [ ] Training different models and evaluating which one is the best.
-  - [ ] Problem with google collab
-  - [ ] Running locally?
-
-- [ ] A client program that will be used to interact with prepared codes. This program uses only one, best recognition model.
-
-
-
-
-## 2. Report
-No longer than **10** pages.
-
-
-- [ ] LaTeX: I suggest we use it for the report.
-- [ ] Work Distribution Section: Create a table or list describing exactly what each group member contributed.
-- [ ] Comparison Analysis: For every point selected (e.g., Optimizers, Dropout), include:
-    - [ ] Accuracy/Loss plots comparing the two methods.
-    - [ ] A brief analysis of why one performed better.
-- [ ] Quality Enhancements: Document the "Silence Removal" process and how it improved the training data quality.
-- [ ] Normalization & Chunking: Explain the choice of 1.0s excerpts and volume normalization parameters.
-- [ ] TensorBoard Exports: Export the charts from your `SummaryWriter` logs to include in the report.
-- [ ] Cleanup: Ensure the `in_depth_eda.ipynb` findings (like SNR and silence ratios) are mentioned in the report to justify your preprocessing choices.
-
-<br>
-
-
-
-
-## Splitting the work:
-
-### Aleksander
-### Michał
-### Piotr
-### Rafał
-### Mantas
