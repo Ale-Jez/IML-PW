@@ -18,7 +18,7 @@ interface VerificationResultData {
   confidence: number;
 }
 
-const API_BASE_URL = "http://10.223.135.81:8000";
+const API_BASE_URL = "http://localhost:8000";
 const isProcessing = (s: OperationStatus): boolean => s === "processing";
 
 const Index = () => {
