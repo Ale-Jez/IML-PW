@@ -17,7 +17,6 @@
 \usepackage{subcaption}
 
 % --- CONFIGURATION / CONSTANTS ---
-% Change the number here, and it updates everywhere in the document
 \newcommand{\numSpeakers}{58} 
 \newcommand{\train}{(80\%)} 
 \newcommand{\validate}{(10\%)} 
@@ -314,6 +313,24 @@ The output is flattened to $(B, T, 1024)$ to serve as input for the temporal blo
 \end{itemize}
 To ensure optimal convergence during the initial training phase, the weights of the AAMSoftmax projection head are initialized using the Xavier uniform strategy.
 
+
+\section{Uncertainty Quantification}
+
+We implemented Monte Carlo (MC) Dropout to estimate model confidence. 
+Dropout layers ($p=0.3$) remain active during inference at three architectural stages: 
+post-CNN (spatial perturbation), post-RNN (temporal variance), and post-Pooling (embedding stability).
+
+\textbf{Stochastic Verification}
+\newline
+Inference executes $T=10$ forward passes per input $x$, generating a distribution of embeddings. 
+Authentication relies on the mean cosine similarity ($S_{final}$) against the reference centroid $C_{ref}$, while variance ($\sigma^2_{pred}$) acts as the uncertainty metric:
+
+\begin{equation}
+    S_{final} = \frac{1}{T} \sum_{t=1}^{T} \cos(f(x; \theta_t), C_{ref}), \quad 
+    \sigma^2_{pred} = \frac{1}{T} \sum_{t=1}^{T} \left( \cos(f(x; \theta_t), C_{ref}) - S_{final} \right)^2
+\end{equation}
+
+Inputs yielding $\sigma^2_{pred}$ above a defined threshold are flagged as ambiguous, preventing false positives on noisy or out-of-distribution samples.
 
 
 
