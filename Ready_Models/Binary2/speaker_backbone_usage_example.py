@@ -90,54 +90,51 @@ speaker_bank = np.load(BANK_FILE)
 speaker_bank = normalize(speaker_bank) 
 
 def verify_speaker(audio_path):
-    # Preprocess (Get batch of 3s chunks)
-    spectrograms, lengths = preprocess_audio(audio_path)
-    if spectrograms is None: return {"speaker_id": -1, "confidence": 0.0, "authorized": False}
+    batch_x, batch_l = preprocess_audio(audio_path)
+    if batch_x is None or batch_l is None:
+        return {
+            "speaker_id": -1,
+            "confidence": 0.0,
+            "confidence_relative": 0.0,
+            "authorized": False
+        }
 
-    # Run Inference
-    outputs = session.run(None, {
-        "input_spectrogram": spectrograms,
-        "input_lengths": lengths
-    })
-    
-    # embeddings shape: [Batch_Size, 256]
-    embeddings = outputs[0]
+    # Run ONNX model for all chunks
+    outputs = session.run(
+        None,
+        {
+            "input_spectrogram": batch_x,
+            "input_lengths": batch_l
+        }
+    )
+    embeddings = outputs[0]  # Shape: [num_chunks, 256]
 
-    # Normalize input embeddings (The model output should be normalized, but good to be safe)
-    embeddings = normalize(embeddings)
+    # Cosine similarity to each speaker in bank
+    sims = embeddings @ speaker_bank.T  # [num_chunks, num_speakers]
+    avg_scores = sims.mean(axis=0)      # [num_speakers]
 
-    # Calculate Similarity for each chunk
-    # [Batch, 256] @ [256, NumSpeakers] = [Batch, NumSpeakers]
-    chunk_scores = embeddings @ speaker_bank.T
-    
-    # Average the scores across all chunks
-    avg_scores = np.mean(chunk_scores, axis=0)
-    
-    # Find best speaker
     best_idx = np.argmax(avg_scores)
     best_score = avg_scores[best_idx]
 
-    # Decision
-    # Class 1 is "Member", Class 0 is "Outsider" (Binary Mode)
-    # Or match specific ID for Speaker ID mode
+    # Map cosine similarity [-1, 1] to [0, 1]
+    confidence = (best_score + 1) / 2
 
+    # Show confidence relative to threshold
+    confidence_relative = (best_score - THRESHOLD) / (1 - THRESHOLD)
+    confidence_relative = max(0.0, min(confidence_relative, 1.0))  # Clamp to [0, 1]
 
-
-
-
-    # is_authorized = (best_idx == 1 and best_score >= THRESHOLD)
     is_authorized = (best_idx == 1 )
-
-
-
-
- 
 
     return {
         "speaker_id": int(best_idx),
-        "confidence": float(best_score),
+        "confidence": float(confidence),
+        "confidence_relative": float(confidence_relative),
         "authorized": is_authorized
     }
+
+# ...existing code...
+
+
 
 # Run Test
 audio_files = glob.glob(os.path.join(TEST_AUDIO_FOLDER, "*.wav"))
